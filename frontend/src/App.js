@@ -6,6 +6,7 @@ import "./App.css";
 
 function App() {
   const [prendas, setPrendas] = useState([]);
+  const [modo, setModo] = useState("light");
 
   const cargarPrendas = async () => {
     const data = await getPrendas();
@@ -16,9 +17,32 @@ function App() {
     cargarPrendas();
   }, []);
 
+  useEffect(() => {
+    document.body.className = modo;
+  }, [modo]);
+
+  const toggleModo = () => {
+    setModo(modo === "light" ? "dark" : "light");
+  };
+
   return (
     <div>
-      <h1>Armario Virtual 👕</h1>
+      <h1>Armario Virtual</h1>
+
+      <div className="toggle-container">
+        <span>☀️</span>
+
+        <label className="switch">
+          <input
+            type="checkbox"
+            onChange={toggleModo}
+            checked={modo === "dark"}
+          />
+          <span className="slider"></span>
+        </label>
+
+        <span>🌙</span>
+      </div>
 
       <Formulario onAdd={cargarPrendas} />
 
