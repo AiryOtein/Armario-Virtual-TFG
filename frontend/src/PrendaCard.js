@@ -1,10 +1,10 @@
 function PrendaCard({ prenda }) {
   return (
-    <div style={{ border: "1px solid black", margin: "10px", padding: "10px" }}>
+    <div className="prenda-card">
       <h3>{prenda.nombre}</h3>
-      <p>Tipo: {prenda.tipo}</p>
-      <p>Color: {prenda.color}</p>
-      <p>Talla: {prenda.talla}</p>
+      <p><strong>Tipo:</strong> {prenda.tipo}</p>
+      <p><strong>Color:</strong> {prenda.color}</p>
+      <p><strong>Talla:</strong> {prenda.talla}</p>
     </div>
   );
 }

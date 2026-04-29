@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getPrendas } from "./api";
 import PrendaCard from "./PrendaCard";
 import Formulario from "./Formulario";
+import "./App.css";
 
 function App() {
   const [prendas, setPrendas] = useState([]);
@@ -17,13 +18,15 @@ function App() {
 
   return (
     <div>
-      <h1>Armario Virtual</h1>
+      <h1>Armario Virtual 👕</h1>
 
       <Formulario onAdd={cargarPrendas} />
 
-      {prendas.map((p) => (
-        <PrendaCard key={p.id} prenda={p} />
-      ))}
+      <div className="prenda-container">
+        {prendas.map((p) => (
+          <PrendaCard key={p.id} prenda={p} />
+        ))}
+      </div>
     </div>
   );
 }
