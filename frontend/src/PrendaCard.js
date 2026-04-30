@@ -1,12 +1,11 @@
 function PrendaCard({ prenda }) {
   return (
     <div className="prenda-card">
-      
       {prenda.imagen && (
         <img
           src={`http://localhost/armario/${prenda.imagen}`}
           alt={prenda.nombre}
-          style={{ width: "100%", borderRadius: "8px", marginBottom: "10px" }}
+          style={{ width: "100%", borderRadius: "8px" }}
         />
       )}
 
@@ -15,7 +14,6 @@ function PrendaCard({ prenda }) {
       <p><strong>Color:</strong> {prenda.color}</p>
       <p><strong>Talla:</strong> {prenda.talla}</p>
       <p><strong>Marca:</strong> {prenda.marca}</p>
-
     </div>
   );
 }

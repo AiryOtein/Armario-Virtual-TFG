@@ -6,51 +6,71 @@ import "./App.css";
 
 function App() {
   const [prendas, setPrendas] = useState([]);
-  const [modo, setModo] = useState("light");
+  const [cajonActual, setCajonActual] = useState(null);
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
 
   const cargarPrendas = async () => {
     const data = await getPrendas();
-    setPrendas(data);
+
+    if (cajonActual) {
+      setPrendas(data.filter(p => p.cajon === cajonActual));
+    } else {
+      setPrendas(data);
+    }
   };
 
   useEffect(() => {
     cargarPrendas();
-  }, []);
-
-  useEffect(() => {
-    document.body.className = modo;
-  }, [modo]);
-
-  const toggleModo = () => {
-    setModo(modo === "light" ? "dark" : "light");
-  };
+  }, [cajonActual]);
 
   return (
     <div>
       <h1>Armario Virtual</h1>
 
-      <div className="toggle-container">
-        <span>☀️</span>
+      {!cajonActual && (
+        <div className="cajones">
+          <button onClick={() => setCajonActual("camisetas")}>Camisetas</button>
+          <button onClick={() => setCajonActual("pantalones")}>Pantalones</button>
+          <button onClick={() => setCajonActual("zapatos")}>Zapatos</button>
+          <button onClick={() => setCajonActual("chaquetas")}>Chaquetas</button>
+        </div>
+      )}
 
-        <label className="switch">
+      {cajonActual && (
+        <>
+          <button onClick={() => setCajonActual(null)}>⬅ Volver</button>
+
           <input
-            type="checkbox"
-            onChange={toggleModo}
-            checked={modo === "dark"}
+            placeholder="Buscar..."
+            onChange={(e) => setBusqueda(e.target.value)}
           />
-          <span className="slider"></span>
-        </label>
 
-        <span>🌙</span>
-      </div>
+          <button onClick={() => setMostrarForm(true)}>
+            Añadir prenda
+          </button>
 
-      <Formulario onAdd={cargarPrendas} />
+          {mostrarForm && (
+            <Formulario
+              cajon={cajonActual}
+              onAdd={() => {
+                cargarPrendas();
+                setMostrarForm(false);
+              }}
+            />
+          )}
 
-      <div className="prenda-container">
-        {prendas.map((p) => (
-          <PrendaCard key={p.id} prenda={p} />
-        ))}
-      </div>
+          <div className="prenda-container">
+            {prendas
+              .filter(p =>
+                p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+              )
+              .map(p => (
+                <PrendaCard key={p.id} prenda={p} />
+              ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

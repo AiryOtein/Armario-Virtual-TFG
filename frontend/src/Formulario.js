@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Formulario({ onAdd }) {
+function Formulario({ onAdd, cajon }) {
   const [form, setForm] = useState({
     nombre: "",
     tipo: "",
@@ -31,6 +31,7 @@ function Formulario({ onAdd }) {
     data.append("color", form.color);
     data.append("talla", form.talla);
     data.append("marca", form.marca);
+    data.append("cajon", cajon);
     data.append("imagen", imagen);
 
     await fetch("http://localhost/armario/upload_prenda.php", {
