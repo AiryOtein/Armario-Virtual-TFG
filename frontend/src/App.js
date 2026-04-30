@@ -9,6 +9,7 @@ function App() {
   const [cajonActual, setCajonActual] = useState(null);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [modo, setModo] = useState("light");
 
   const cargarPrendas = async () => {
     const data = await getPrendas();
@@ -24,16 +25,38 @@ function App() {
     cargarPrendas();
   }, [cajonActual]);
 
+  useEffect(() => {
+    document.body.className = modo;
+  }, [modo]);
+
+  const toggleModo = () => {
+    setModo(modo === "light" ? "dark" : "light");
+  };
+
   return (
     <div>
+      <div className="toggle-container">
+        <span>☀️</span>
+        <label className="switch">
+          <input type="checkbox" onChange={toggleModo} />
+          <span className="slider"></span>
+        </label>
+        <span>🌙</span>
+      </div>
+
       <h1>Armario Virtual</h1>
 
       {!cajonActual && (
         <div className="cajones">
-          <button onClick={() => setCajonActual("camisetas")}>Camisetas</button>
-          <button onClick={() => setCajonActual("pantalones")}>Pantalones</button>
-          <button onClick={() => setCajonActual("zapatos")}>Zapatos</button>
-          <button onClick={() => setCajonActual("chaquetas")}>Chaquetas</button>
+          {["Camisetas", "Pantalones", "Zapatos", "Chaquetas"].map(c => (
+            <div
+              key={c}
+              className="cajon-card"
+              onClick={() => setCajonActual(c.toLowerCase())}
+            >
+              {c}
+            </div>
+          ))}
         </div>
       )}
 
