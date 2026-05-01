@@ -1,7 +1,9 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "armario");
+header("Access-Control-Allow-Origin: *");
 
-$id = $_GET['id'];
+include "db.php";
+
+$id = intval($_GET['id']);
 
 $conn->query("DELETE FROM prendas WHERE id=$id");
 

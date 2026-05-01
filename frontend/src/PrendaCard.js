@@ -1,18 +1,20 @@
-function PrendaCard({ prenda }) {
+function PrendaCard({ prenda, onDelete }) {
 
   const borrar = async () => {
-    await fetch(`http://localhost/armario/delete_prenda.php?id=${prenda.id}`);
-    window.location.reload();
+fetch(`http://localhost/armario/backend/delete_prenda.php?id=${prenda.id}`);    onDelete(prenda.id);
   };
 
   return (
     <div className="prenda-card">
-      <img src={`http://localhost/armario/uploads/${prenda.imagen}`} />
+      <img
+        src={`http://localhost/armario/uploads/${prenda.imagen}`}
+        alt={prenda.nombre}
+      />
 
       <h3>{prenda.nombre}</h3>
-      <p>{prenda.tipo}</p>
-      <p>{prenda.color}</p>
-      <p>{prenda.talla}</p>
+      <p><strong>Tipo:</strong> {prenda.tipo}</p>
+      <p><strong>Color:</strong> {prenda.color}</p>
+      <p><strong>Talla:</strong> {prenda.talla}</p>
 
       <button onClick={borrar}>🗑️</button>
     </div>

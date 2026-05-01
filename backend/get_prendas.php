@@ -2,7 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
-include "db.php";
+$conn = new mysqli("localhost", "root", "", "armario");
 
 $result = $conn->query("SELECT * FROM prendas");
 
