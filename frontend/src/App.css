@@ -2,6 +2,36 @@ html, body {
   min-height: 100%;
 }
 
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.hero h2 {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+}
+
+.hero p {
+  color: #7a6a58;
+}
+
 body {
   margin: 0;
   font-family: 'Segoe UI', Arial, sans-serif;
