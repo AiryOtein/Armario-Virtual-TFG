@@ -12,14 +12,15 @@ function App() {
   const [busqueda, setBusqueda] = useState("");
   const [modo, setModo] = useState("light");
 
-const cajonesBase = ["camisetas", "pantalones", "zapatos", "vestidos"];
+  const cajonesBase = ["camisetas", "pantalones", "zapatos", "vestidos"];
 
-const cajones = [
-  ...new Set([
-    ...cajonesBase,
-    ...todasPrendas.map(p => p.cajon)
-  ])
-];
+  const cajones = [
+    ...new Set([
+      ...cajonesBase,
+      ...todasPrendas.map(p => p.cajon)
+    ])
+  ];
+
   const cargarPrendas = async () => {
     const data = await getPrendas();
     setTodasPrendas(data);
@@ -57,31 +58,38 @@ const cajones = [
       <h1>Armario Virtual</h1>
 
       {!cajonActual && (
-        <div className="cajones">
-          {cajones.map(c => (
-            <div
-              key={c}
-              className="cajon-card"
-              onClick={() => setCajonActual(c)}
-            >
-              {c.charAt(0).toUpperCase() + c.slice(1)}
-            </div>
-          ))}
-
-          <div
-            className="cajon-card add"
-            onClick={() => {
-              const nuevo = prompt("Nombre del nuevo cajón:");
-              if (nuevo) setCajonActual(nuevo.toLowerCase());
-            }}
-          >
-            +
+        <>
+          <div className="hero">
+            <h2>Organiza tu armario fácilmente</h2>
+            <p>Guarda tus prendas, clasifícalas y encuéntralas en segundos.</p>
           </div>
-        </div>
+
+          <div className="cajones">
+            {cajones.map(c => (
+              <div
+                key={c}
+                className="cajon-card"
+                onClick={() => setCajonActual(c)}
+              >
+                {c.charAt(0).toUpperCase() + c.slice(1)}
+              </div>
+            ))}
+
+            <div
+              className="cajon-card add"
+              onClick={() => {
+                const nuevo = prompt("Nombre del nuevo cajón:");
+                if (nuevo) setCajonActual(nuevo.toLowerCase());
+              }}
+            >
+              +
+            </div>
+          </div>
+        </>
       )}
 
       {cajonActual && (
-        <>
+        <div className="fade-in">
           <button onClick={() => setCajonActual(null)}>⬅ Volver</button>
 
           <input
@@ -90,7 +98,7 @@ const cajones = [
           />
 
           <button onClick={() => setMostrarForm(true)}>
-            Añadir prenda
+            Añadir nueva prenda +
           </button>
 
           {mostrarForm && (
@@ -103,6 +111,12 @@ const cajones = [
             />
           )}
 
+          {prendas.length === 0 && (
+            <p style={{ textAlign: "center" }}>
+              No hay prendas aún, ¡añade la primera!
+            </p>
+          )}
+
           <div className="prenda-container">
             {prendas
               .filter(p =>
@@ -112,7 +126,7 @@ const cajones = [
                 <PrendaCard key={p.id} prenda={p} />
               ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
