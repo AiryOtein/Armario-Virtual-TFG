@@ -5,19 +5,29 @@ import Formulario from "./Formulario";
 import "./App.css";
 
 function App() {
+  const [todasPrendas, setTodasPrendas] = useState([]);
   const [prendas, setPrendas] = useState([]);
   const [cajonActual, setCajonActual] = useState(null);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [modo, setModo] = useState("light");
 
+const cajonesBase = ["camisetas", "pantalones", "zapatos", "vestidos"];
+
+const cajones = [
+  ...new Set([
+    ...cajonesBase,
+    ...todasPrendas.map(p => p.cajon)
+  ])
+];
   const cargarPrendas = async () => {
     const data = await getPrendas();
+    setTodasPrendas(data);
 
     if (cajonActual) {
       setPrendas(data.filter(p => p.cajon === cajonActual));
     } else {
-      setPrendas(data);
+      setPrendas([]);
     }
   };
 
@@ -48,15 +58,25 @@ function App() {
 
       {!cajonActual && (
         <div className="cajones">
-          {["Camisetas", "Pantalones", "Zapatos", "Chaquetas"].map(c => (
+          {cajones.map(c => (
             <div
               key={c}
               className="cajon-card"
-              onClick={() => setCajonActual(c.toLowerCase())}
+              onClick={() => setCajonActual(c)}
             >
-              {c}
+              {c.charAt(0).toUpperCase() + c.slice(1)}
             </div>
           ))}
+
+          <div
+            className="cajon-card add"
+            onClick={() => {
+              const nuevo = prompt("Nombre del nuevo cajón:");
+              if (nuevo) setCajonActual(nuevo.toLowerCase());
+            }}
+          >
+            +
+          </div>
         </div>
       )}
 
