@@ -1,3 +1,7 @@
+html, body {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   font-family: 'Segoe UI', Arial, sans-serif;
@@ -5,12 +9,15 @@ body {
 }
 
 body.light {
-  background: linear-gradient(135deg, #f5f1eb, #e8dfd6);
+  background: linear-gradient(160deg, #f5f1eb 0%, #e8dfd6 100%);  background-attachment: fixed;
+  min-height: 100vh;
   color: #4b3621;
 }
 
 body.dark {
   background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+  background-attachment: fixed;
+  min-height: 100vh;
   color: white;
 }
 
@@ -154,4 +161,12 @@ body.dark input {
 
 input:checked + .slider:before {
   transform: translateX(24px);
+}
+.cajon-card.add {
+  background: #cbb49d;
+  font-size: 2rem;
+}
+
+.cajon-card.add:hover {
+  background: #b89d82;
 }
