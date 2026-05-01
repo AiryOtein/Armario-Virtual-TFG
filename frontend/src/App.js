@@ -66,12 +66,34 @@ function App() {
 
           <div className="cajones">
             {cajones.map(c => (
-              <div
-                key={c}
-                className="cajon-card"
-                onClick={() => setCajonActual(c)}
-              >
-                {c.charAt(0).toUpperCase() + c.slice(1)}
+              <div key={c} className="cajon-card">
+                <div
+                  className="cajon-title"
+                  onClick={() => setCajonActual(c)}
+                >
+                  {c.charAt(0).toUpperCase() + c.slice(1)}
+                </div>
+
+                <button
+                  className="delete-btn"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+
+                    if (window.confirm(`¿Borrar el cajón "${c}"?`)) {
+                      await fetch(
+                        `http://localhost/armario/delete_cajon.php?cajon=${c}`
+                      );
+
+                      if (cajonActual === c) {
+                        setCajonActual(null);
+                      }
+
+                      cargarPrendas();
+                    }
+                  }}
+                >
+                  🗑️ Borrar
+                </button>
               </div>
             ))}
 
@@ -89,8 +111,10 @@ function App() {
       )}
 
       {cajonActual && (
-        <div className="fade-in">
-          <button onClick={() => setCajonActual(null)}>⬅ Volver</button>
+        <div className="fade-in slide-in">
+          <button onClick={() => setCajonActual(null)}>
+            ⬅ Volver
+          </button>
 
           <input
             placeholder="Buscar..."
