@@ -67,6 +67,7 @@ function App() {
           <div className="cajones">
             {cajones.map(c => (
               <div key={c} className="cajon-card">
+
                 <div
                   className="cajon-title"
                   onClick={() => setCajonActual(c)}
@@ -81,19 +82,18 @@ function App() {
 
                     if (window.confirm(`¿Borrar el cajón "${c}"?`)) {
                       await fetch(
-                        `http://localhost/armario/delete_cajon.php?cajon=${c}`
+                        `http://localhost/armario/delete_cajon.php?cajon=${encodeURIComponent(c)}`
                       );
 
-                      if (cajonActual === c) {
-                        setCajonActual(null);
-                      }
-
-                      cargarPrendas();
+                      setTodasPrendas(prev =>
+                        prev.filter(p => p.cajon !== c)
+                      );
                     }
                   }}
                 >
-                  🗑️ Borrar
+                  🗑️
                 </button>
+
               </div>
             ))}
 
@@ -147,7 +147,15 @@ function App() {
                 p.nombre.toLowerCase().includes(busqueda.toLowerCase())
               )
               .map(p => (
-                <PrendaCard key={p.id} prenda={p} />
+                <PrendaCard
+                  key={p.id}
+                  prenda={p}
+                  onDelete={(id) =>
+                    setPrendas(prev =>
+                      prev.filter(p => p.id !== id)
+                    )
+                  }
+                />
               ))}
           </div>
         </div>

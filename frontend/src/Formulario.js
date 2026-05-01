@@ -25,6 +25,19 @@ function Formulario({ onAdd, cajon }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 🔴 VALIDACIÓN
+    if (
+      !form.nombre ||
+      !form.tipo ||
+      !form.color ||
+      !form.talla ||
+      !form.marca ||
+      !imagen
+    ) {
+      alert("Rellena todos los campos y añade una imagen");
+      return;
+    }
+
     const data = new FormData();
     data.append("nombre", form.nombre);
     data.append("tipo", form.tipo);
@@ -34,10 +47,22 @@ function Formulario({ onAdd, cajon }) {
     data.append("cajon", cajon);
     data.append("imagen", imagen);
 
-    await fetch("http://localhost/armario/upload_prenda.php", {
+    await fetch("http://localhost/armario/backend/upload_prenda.php", {
       method: "POST",
       body: data,
     });
+
+    // limpiar formulario
+    setForm({
+      nombre: "",
+      tipo: "",
+      color: "",
+      talla: "",
+      marca: "",
+    });
+
+    setImagen(null);
+    setPreview(null);
 
     onAdd();
   };
@@ -52,7 +77,7 @@ function Formulario({ onAdd, cajon }) {
 
       <input type="file" onChange={handleImage} />
 
-      {preview && <img src={preview} width="100" />}
+      {preview && <img src={preview} width="120" />}
 
       <button type="submit">Guardar</button>
     </form>

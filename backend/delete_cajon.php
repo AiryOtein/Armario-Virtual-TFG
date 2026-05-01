@@ -1,7 +1,9 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "armario");
+header("Access-Control-Allow-Origin: *");
 
-$cajon = $_GET['cajon'];
+include "db.php";
+
+$cajon = $conn->real_escape_string($_GET['cajon']);
 
 $conn->query("DELETE FROM prendas WHERE cajon='$cajon'");
 
