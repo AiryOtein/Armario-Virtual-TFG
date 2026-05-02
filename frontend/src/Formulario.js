@@ -25,16 +25,8 @@ function Formulario({ onAdd, cajon }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔴 VALIDACIÓN
-    if (
-      !form.nombre ||
-      !form.tipo ||
-      !form.color ||
-      !form.talla ||
-      !form.marca ||
-      !imagen
-    ) {
-      alert("Rellena todos los campos y añade una imagen");
+    if (!form.nombre || !form.tipo || !form.color || !form.talla || !imagen) {
+      alert("Rellena todos los campos");
       return;
     }
 
@@ -52,18 +44,6 @@ function Formulario({ onAdd, cajon }) {
       body: data,
     });
 
-    // limpiar formulario
-    setForm({
-      nombre: "",
-      tipo: "",
-      color: "",
-      talla: "",
-      marca: "",
-    });
-
-    setImagen(null);
-    setPreview(null);
-
     onAdd();
   };
 
@@ -77,7 +57,7 @@ function Formulario({ onAdd, cajon }) {
 
       <input type="file" onChange={handleImage} />
 
-      {preview && <img src={preview} width="120" />}
+      {preview && <img src={preview} width="100" />}
 
       <button type="submit">Guardar</button>
     </form>

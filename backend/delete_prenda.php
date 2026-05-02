@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 
-include "db.php";
+$conn = new mysqli("localhost", "root", "", "armario");
 
 $id = intval($_GET['id']);
 
