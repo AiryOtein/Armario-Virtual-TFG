@@ -12,6 +12,8 @@ function Formulario({ onAdd, cajon }) {
   const [imagen, setImagen] = useState(null);
   const [preview, setPreview] = useState(null);
 
+  const tallas = ["XXS","XS","S","M","L","XL","XXL"];
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -26,16 +28,12 @@ function Formulario({ onAdd, cajon }) {
     e.preventDefault();
 
     if (!form.nombre || !form.tipo || !form.color || !form.talla || !imagen) {
-      alert("Rellena todos los campos");
+      alert("Completa todos los campos");
       return;
     }
 
     const data = new FormData();
-    data.append("nombre", form.nombre);
-    data.append("tipo", form.tipo);
-    data.append("color", form.color);
-    data.append("talla", form.talla);
-    data.append("marca", form.marca);
+    Object.keys(form).forEach(key => data.append(key, form[key]));
     data.append("cajon", cajon);
     data.append("imagen", imagen);
 
@@ -48,16 +46,21 @@ function Formulario({ onAdd, cajon }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="formulario fade-in">
       <input name="nombre" placeholder="Nombre" onChange={handleChange} />
       <input name="tipo" placeholder="Tipo" onChange={handleChange} />
       <input name="color" placeholder="Color" onChange={handleChange} />
-      <input name="talla" placeholder="Talla" onChange={handleChange} />
+
+      <select name="talla" onChange={handleChange}>
+        <option value="">Selecciona talla</option>
+        {tallas.map(t => <option key={t}>{t}</option>)}
+      </select>
+
       <input name="marca" placeholder="Marca" onChange={handleChange} />
 
       <input type="file" onChange={handleImage} />
 
-      {preview && <img src={preview} width="100" />}
+      {preview && <img src={preview} className="preview" />}
 
       <button type="submit">Guardar</button>
     </form>
