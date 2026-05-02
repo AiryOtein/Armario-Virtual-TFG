@@ -11,14 +11,12 @@ $marca = $_POST['marca'];
 $cajon = $_POST['cajon'];
 
 $imagen = $_FILES['imagen']['name'];
-$ruta = "uploads/" . $imagen;
+$ruta = "../uploads/" . $imagen;
 
 move_uploaded_file($_FILES['imagen']['tmp_name'], $ruta);
 
-$sql = "INSERT INTO prendas (nombre, tipo, color, talla, marca, cajon, imagen)
-VALUES ('$nombre', '$tipo', '$color', '$talla', '$marca', '$cajon', '$imagen')";
-
-$conn->query($sql);
+$conn->query("INSERT INTO prendas (nombre, tipo, color, talla, marca, cajon, imagen)
+VALUES ('$nombre','$tipo','$color','$talla','$marca','$cajon','$imagen')");
 
 echo "ok";
 ?>

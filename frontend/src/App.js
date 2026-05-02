@@ -11,12 +11,14 @@ function App() {
   const [mostrarForm, setMostrarForm] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [modo, setModo] = useState("light");
+  const [cajonesExtra, setCajonesExtra] = useState([]);
 
   const cajonesBase = ["camisetas", "pantalones", "zapatos", "vestidos"];
 
   const cajones = [
     ...new Set([
       ...cajonesBase,
+      ...cajonesExtra,
       ...todasPrendas.map(p => p.cajon)
     ])
   ];
@@ -44,6 +46,27 @@ function App() {
     setModo(modo === "light" ? "dark" : "light");
   };
 
+  const crearCajon = () => {
+    const nuevo = prompt("Nombre del nuevo cajón:");
+    if (nuevo) {
+      setCajonesExtra(prev => [...prev, nuevo.toLowerCase()]);
+    }
+  };
+
+  const borrarCajon = async (c) => {
+    if (window.confirm(`¿Borrar el cajón "${c}"?`)) {
+      await fetch(
+        `http://localhost/armario/backend/delete_cajon.php?cajon=${encodeURIComponent(c)}`
+      );
+
+      setCajonesExtra(prev => prev.filter(x => x !== c));
+
+      if (cajonActual === c) setCajonActual(null);
+
+      cargarPrendas();
+    }
+  };
+
   return (
     <div>
       <div className="toggle-container">
@@ -65,47 +88,36 @@ function App() {
           </div>
 
           <div className="cajones">
-            {cajones.map(c => (
-              <div key={c} className="cajon-card">
+            {cajones.map(c => {
+              const cantidad = todasPrendas.filter(p => p.cajon === c).length;
+              const esBase = cajonesBase.includes(c);
 
-                <div
-                  className="cajon-title"
-                  onClick={() => setCajonActual(c)}
-                >
-                  {c.charAt(0).toUpperCase() + c.slice(1)}
+              return (
+                <div key={c} className="cajon-card">
+                  <div
+                    className="cajon-title"
+                    onClick={() => setCajonActual(c)}
+                  >
+                    {c.charAt(0).toUpperCase() + c.slice(1)}
+                    <span className="contador">{cantidad}</span>
+                  </div>
+
+                  {!esBase && (
+                    <button
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        borrarCajon(c);
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </div>
+              );
+            })}
 
-                <button
-                  className="delete-btn"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-
-                    if (window.confirm(`¿Borrar el cajón "${c}"?`)) {
-                      await fetch(
-                        `http://localhost/armario/backend/delete_cajon.php?cajon=${encodeURIComponent(c)}`
-                      );
-
-                      if (cajonActual === c) {
-                        setCajonActual(null);
-                      }
-
-                      cargarPrendas();
-                    }
-                  }}
-                >
-                  🗑️
-                </button>
-
-              </div>
-            ))}
-
-            <div
-              className="cajon-card add"
-              onClick={() => {
-                const nuevo = prompt("Nombre del nuevo cajón:");
-                if (nuevo) setCajonActual(nuevo.toLowerCase());
-              }}
-            >
+            <div className="cajon-card add" onClick={crearCajon}>
               +
             </div>
           </div>
@@ -114,9 +126,7 @@ function App() {
 
       {cajonActual && (
         <div className="fade-in slide-in">
-          <button onClick={() => setCajonActual(null)}>
-            ⬅ Volver
-          </button>
+          <button onClick={() => setCajonActual(null)}>⬅ Volver</button>
 
           <input
             placeholder="Buscar..."
