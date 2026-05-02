@@ -1,7 +1,8 @@
 function PrendaCard({ prenda, onDelete }) {
 
   const borrar = async () => {
-fetch(`http://localhost/armario/backend/delete_prenda.php?id=${prenda.id}`);    onDelete(prenda.id);
+    await fetch(`http://localhost/armario/backend/delete_prenda.php?id=${prenda.id}`);
+    onDelete();
   };
 
   return (
@@ -12,9 +13,9 @@ fetch(`http://localhost/armario/backend/delete_prenda.php?id=${prenda.id}`);    
       />
 
       <h3>{prenda.nombre}</h3>
-      <p><strong>Tipo:</strong> {prenda.tipo}</p>
-      <p><strong>Color:</strong> {prenda.color}</p>
-      <p><strong>Talla:</strong> {prenda.talla}</p>
+      <p>{prenda.tipo}</p>
+      <p>{prenda.color}</p>
+      <p>{prenda.talla}</p>
 
       <button onClick={borrar}>🗑️</button>
     </div>

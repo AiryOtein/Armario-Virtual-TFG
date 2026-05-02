@@ -82,12 +82,14 @@ function App() {
 
                     if (window.confirm(`¿Borrar el cajón "${c}"?`)) {
                       await fetch(
-                        `http://localhost/armario/delete_cajon.php?cajon=${encodeURIComponent(c)}`
+                        `http://localhost/armario/backend/delete_cajon.php?cajon=${encodeURIComponent(c)}`
                       );
 
-                      setTodasPrendas(prev =>
-                        prev.filter(p => p.cajon !== c)
-                      );
+                      if (cajonActual === c) {
+                        setCajonActual(null);
+                      }
+
+                      cargarPrendas();
                     }
                   }}
                 >
@@ -150,11 +152,7 @@ function App() {
                 <PrendaCard
                   key={p.id}
                   prenda={p}
-                  onDelete={(id) =>
-                    setPrendas(prev =>
-                      prev.filter(p => p.id !== id)
-                    )
-                  }
+                  onDelete={cargarPrendas}
                 />
               ))}
           </div>
