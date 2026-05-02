@@ -14,6 +14,7 @@ function App() {
   const [cajonesExtra, setCajonesExtra] = useState([]);
   const [filtro, setFiltro] = useState({ color: "", talla: "", marca: "" });
 
+  const tallas = ["XXS","XS","S","M","L","XL","XXL"];
   const cajonesBase = ["camisetas", "pantalones", "zapatos", "vestidos"];
 
   const cajones = [
@@ -66,11 +67,6 @@ function App() {
     cargarPrendas();
   };
 
-  const moverPrenda = async (id, nuevoCajon) => {
-    await fetch(`http://localhost/armario/backend/mover_prenda.php?id=${id}&cajon=${nuevoCajon}`);
-    cargarPrendas();
-  };
-
   return (
     <div>
       <div className="toggle-container">
@@ -100,14 +96,9 @@ function App() {
                   key={c}
                   className="cajon-card"
                   onClick={() => setCajonActual(c)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    const id = e.dataTransfer.getData("id");
-                    moverPrenda(id, c);
-                  }}
                 >
                   <div className="cajon-title">
-                    {c}
+                    {c.charAt(0).toUpperCase() + c.slice(1)}
                     <span className="contador">{cantidad}</span>
                   </div>
 
@@ -133,23 +124,49 @@ function App() {
 
       {cajonActual && (
         <div className="fade-in">
-          <button onClick={() => setCajonActual(null)}>⬅ Volver</button>
+          <div className="center-buttons">
+            <button onClick={() => {
+              setCajonActual(null);
+              setMostrarForm(false);
+            }}>
+              ⬅ Volver
+            </button>
 
-          <input placeholder="Buscar..." onChange={(e) => setBusqueda(e.target.value)} />
-
-          <div className="filtros">
-            <input placeholder="Color" onChange={(e) => setFiltro({ ...filtro, color: e.target.value })} />
-            <input placeholder="Talla" onChange={(e) => setFiltro({ ...filtro, talla: e.target.value })} />
-            <input placeholder="Marca" onChange={(e) => setFiltro({ ...filtro, marca: e.target.value })} />
+            <button onClick={() => setMostrarForm(true)}>
+              Añadir prenda +
+            </button>
           </div>
 
-          <button onClick={() => setMostrarForm(true)}>Añadir prenda +</button>
+          <div className="top-bar">
+            <input
+              placeholder="Buscar..."
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
 
-          {mostrarForm && (
-            <Formulario cajon={cajonActual} onAdd={() => {
-              cargarPrendas();
-              setMostrarForm(false);
-            }} />
+            <select onChange={(e) => setFiltro({ ...filtro, talla: e.target.value })}>
+              <option value="">Talla</option>
+              {tallas.map(t => <option key={t}>{t}</option>)}
+            </select>
+
+            <input
+              placeholder="Color"
+              onChange={(e) => setFiltro({ ...filtro, color: e.target.value })}
+            />
+
+            <input
+              placeholder="Marca"
+              onChange={(e) => setFiltro({ ...filtro, marca: e.target.value })}
+            />
+          </div>
+
+          {cajonActual && mostrarForm && (
+            <Formulario
+              cajon={cajonActual}
+              onAdd={() => {
+                cargarPrendas();
+                setMostrarForm(false);
+              }}
+            />
           )}
 
           <div className="prenda-container">
@@ -165,7 +182,7 @@ function App() {
                   key={p.id}
                   prenda={p}
                   onDelete={cargarPrendas}
-                  onFav={toggleFavorito}
+                  onFav={cargarPrendas}
                 />
               ))}
           </div>
