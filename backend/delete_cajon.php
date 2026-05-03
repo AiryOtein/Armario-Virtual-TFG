@@ -1,11 +1,12 @@
 <?php
 header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json");
 
 $conn = new mysqli("localhost", "root", "", "armario");
 
-$cajon = $_GET['cajon'];
+$id = intval($_GET['id']);
 
-$conn->query("DELETE FROM prendas WHERE cajon='$cajon'");
+$conn->query("DELETE FROM prendas WHERE id=$id");
 
-echo "ok";
+echo json_encode(["ok" => true]);
 ?>
