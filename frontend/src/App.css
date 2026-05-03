@@ -359,3 +359,40 @@ input:checked + .slider:before {
   object-fit: cover;
   border-radius: 10px;
 }
+.cajones-mini {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px;
+}
+
+.cajon-chip {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+  cursor: pointer;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.cajon-chip span {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.cajon-chip:hover {
+  transform: scale(1.05);
+}
+
+.cajon-chip.activo {
+  background: #a67c52;
+  color: white;
+}
+
+.cajon-chip.add {
+  font-size: 1.2rem;
+}

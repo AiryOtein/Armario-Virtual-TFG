@@ -105,7 +105,13 @@ function App() {
       <h1>Armario Virtual</h1>
 
       <div className="center-buttons">
-        <button onClick={() => setVista("armario")}>Armario</button>
+        <button onClick={() => {
+  setVista("armario");
+  setCajonActual(null);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}}>
+  Armario
+</button>
         <button onClick={() => {
           setVista("favoritos");
           cargarFavoritos();
@@ -122,7 +128,7 @@ function App() {
             <h2>Organiza tu armario fácilmente</h2>
           </div>
 
-          <div className="cajones">
+          <div className="cajones-mini">
             {cajones.map(c => {
               const cantidad = todasPrendas.filter(p => p.cajon === c).length;
               const esBase = cajonesBase.includes(c);
@@ -130,13 +136,11 @@ function App() {
               return (
                 <div
                   key={c}
-                  className="cajon-card"
+                  className="cajon-chip"
                   onClick={() => setCajonActual(c)}
                 >
-                  <div className="cajon-title">
-                    {c.charAt(0).toUpperCase() + c.slice(1)}
-                    <span className="contador">{cantidad}</span>
-                  </div>
+                  {c}
+                  <span>{cantidad}</span>
 
                   {!esBase && (
                     <button
@@ -153,29 +157,12 @@ function App() {
               );
             })}
 
-            <div className="cajon-card add" onClick={crearCajon}>+</div>
-          </div>
-        </>
-      )}
-
-      {vista === "armario" && cajonActual && (
-        <div className="fade-in">
-          <div className="center-buttons">
-            <button onClick={() => {
-              setCajonActual(null);
-              setMostrarForm(false);
-            }}>
-              ⬅ Volver
-            </button>
-
-            <button onClick={() => setMostrarForm(true)}>
-              Añadir prenda +
-            </button>
+            <div className="cajon-chip add" onClick={crearCajon}>+</div>
           </div>
 
           <div className="top-bar">
             <input
-              placeholder="Buscar..."
+              placeholder="Buscar en todo..."
               onChange={(e) => setBusqueda(e.target.value)}
             />
 
@@ -195,18 +182,8 @@ function App() {
             />
           </div>
 
-          {mostrarForm && (
-            <Formulario
-              cajon={cajonActual}
-              onAdd={() => {
-                cargarPrendas();
-                setMostrarForm(false);
-              }}
-            />
-          )}
-
           <div className="prenda-container">
-            {prendas
+            {todasPrendas
               .filter(p =>
                 p.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
                 p.color.toLowerCase().includes(filtro.color.toLowerCase()) &&
@@ -214,20 +191,59 @@ function App() {
                 p.marca.toLowerCase().includes(filtro.marca.toLowerCase())
               )
               .map(p => (
-                <div key={p.id} onClick={() => toggleSeleccion(p.id)}>
-                  <PrendaCard
-                    prenda={p}
-                    onDelete={() => {
-                      cargarPrendas();
-                      if (vista === "favoritos") cargarFavoritos();
-                    }}
-                    onFav={() => {
-                      cargarPrendas();
-                      cargarFavoritos();
-                    }}
-                  />
-                </div>
+                <PrendaCard
+                  key={p.id}
+                  prenda={p}
+                  onDelete={() => {
+                    cargarPrendas();
+                    cargarFavoritos();
+                  }}
+                  onFav={() => {
+                    cargarPrendas();
+                    cargarFavoritos();
+                  }}
+                />
               ))}
+          </div>
+        </>
+      )}
+
+      {vista === "armario" && cajonActual && (
+        <div className="fade-in">
+          <div className="center-buttons">
+            <button onClick={() => {
+              setCajonActual(null);
+              setMostrarForm(false);
+            }}>
+              ⬅ Volver
+            </button>
+
+            <button onClick={() => setMostrarForm(true)}>
+              Añadir prenda +
+            </button>
+          </div>
+
+          {mostrarForm && (
+          <Formulario
+            cajon={cajonActual}
+            onAdd={async () => {
+              await cargarPrendas();
+              setCajonActual(null);
+              setMostrarForm(false);
+            }}
+          />
+          )}
+
+          <div className="prenda-container">
+            {prendas.map(p => (
+              <div key={p.id} onClick={() => toggleSeleccion(p.id)}>
+                <PrendaCard
+                  prenda={p}
+                  onDelete={cargarPrendas}
+                  onFav={cargarPrendas}
+                />
+              </div>
+            ))}
           </div>
         </div>
       )}

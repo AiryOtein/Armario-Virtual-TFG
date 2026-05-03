@@ -27,6 +27,11 @@ function Formulario({ onAdd, cajon }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!cajon) {
+      alert("Selecciona un cajón antes de añadir la prenda");
+      return;
+    }
+
     if (!form.nombre || !form.tipo || !form.color || !form.talla || !imagen) {
       alert("Completa todos los campos");
       return;
