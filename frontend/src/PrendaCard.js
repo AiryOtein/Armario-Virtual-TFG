@@ -1,17 +1,23 @@
 function PrendaCard({ prenda, onDelete, onFav }) {
-  const borrar = async () => {
+
+  const borrar = async (e) => {
+    e.stopPropagation();
     await fetch(`http://localhost/armario/backend/delete_prenda.php?id=${prenda.id}`);
     onDelete && onDelete();
   };
 
-  const toggleFav = async () => {
+  const toggleFav = async (e) => {
+    e.stopPropagation();
     await fetch(`http://localhost/armario/backend/favorito.php?id=${prenda.id}&fav=${prenda.favorito == 1 ? 0 : 1}`);
     onFav && onFav();
   };
 
   return (
     <div className="prenda-card">
-      <img src={`http://localhost/armario/uploads/${prenda.imagen}`} />
+      <img
+        src={`http://localhost/armario/uploads/${prenda.imagen}`}
+        onError={(e) => e.target.style.display = "none"}
+      />
 
       <div className="prenda-actions">
         <button onClick={toggleFav}>

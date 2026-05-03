@@ -217,8 +217,14 @@ function App() {
                 <div key={p.id} onClick={() => toggleSeleccion(p.id)}>
                   <PrendaCard
                     prenda={p}
-                    onDelete={cargarPrendas}
-                    onFav={cargarPrendas}
+                    onDelete={() => {
+                      cargarPrendas();
+                      if (vista === "favoritos") cargarFavoritos();
+                    }}
+                    onFav={() => {
+                      cargarPrendas();
+                      cargarFavoritos();
+                    }}
                   />
                 </div>
               ))}
