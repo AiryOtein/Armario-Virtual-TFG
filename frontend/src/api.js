@@ -5,17 +5,23 @@ export const getPrendas = async () => {
   return res.json();
 };
 
-export const addPrenda = async (formData) => {
-  await fetch(`${URL}/upload_prenda.php`, {
+export const getFavoritos = async () => {
+  const res = await fetch(`${URL}/get_favoritos.php`);
+  return res.json();
+};
+
+export const crearOutfit = async (nombre, prendas) => {
+  const data = new FormData();
+  data.append("nombre", nombre);
+  prendas.forEach(p => data.append("prendas[]", p));
+
+  await fetch(`${URL}/crear_outfit.php`, {
     method: "POST",
-    body: formData,
+    body: data
   });
 };
 
-export const deletePrenda = async (id) => {
-  await fetch(`${URL}/delete_prenda.php?id=${id}`);
-};
-
-export const deleteCajon = async (cajon) => {
-  await fetch(`${URL}/delete_cajon.php?cajon=${encodeURIComponent(cajon)}`);
+export const getOutfits = async () => {
+  const res = await fetch(`${URL}/get_outfits.php`);
+  return res.json();
 };

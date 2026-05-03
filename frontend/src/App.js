@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getPrendas } from "./api";
+import { getPrendas, getFavoritos, getOutfits, crearOutfit } from "./api";
 import PrendaCard from "./PrendaCard";
 import Formulario from "./Formulario";
 import "./App.css";
@@ -7,10 +7,14 @@ import "./App.css";
 function App() {
   const [todasPrendas, setTodasPrendas] = useState([]);
   const [prendas, setPrendas] = useState([]);
+  const [favoritos, setFavoritos] = useState([]);
+  const [outfits, setOutfits] = useState([]);
+  const [seleccion, setSeleccion] = useState([]);
   const [cajonActual, setCajonActual] = useState(null);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [modo, setModo] = useState("light");
+  const [vista, setVista] = useState("armario");
   const [cajonesExtra, setCajonesExtra] = useState([]);
   const [filtro, setFiltro] = useState({ color: "", talla: "", marca: "" });
 
@@ -28,12 +32,21 @@ function App() {
   const cargarPrendas = async () => {
     const data = await getPrendas();
     setTodasPrendas(data);
-
     if (cajonActual) {
       setPrendas(data.filter(p => p.cajon === cajonActual));
     } else {
       setPrendas([]);
     }
+  };
+
+  const cargarFavoritos = async () => {
+    const data = await getFavoritos();
+    setFavoritos(data);
+  };
+
+  const cargarOutfits = async () => {
+    const data = await getOutfits();
+    setOutfits(data);
   };
 
   useEffect(() => {
@@ -62,9 +75,20 @@ function App() {
     }
   };
 
-  const toggleFavorito = async (id, favorito) => {
-    await fetch(`http://localhost/armario/backend/favorito.php?id=${id}&fav=${favorito ? 0 : 1}`);
-    cargarPrendas();
+  const toggleSeleccion = (id) => {
+    setSeleccion(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
+    );
+  };
+
+  const crearNuevoOutfit = async () => {
+    const nombre = prompt("Nombre del outfit:");
+    if (!nombre || seleccion.length === 0) return;
+    await crearOutfit(nombre, seleccion);
+    setSeleccion([]);
+    cargarOutfits();
   };
 
   return (
@@ -80,7 +104,19 @@ function App() {
 
       <h1>Armario Virtual</h1>
 
-      {!cajonActual && (
+      <div className="center-buttons">
+        <button onClick={() => setVista("armario")}>Armario</button>
+        <button onClick={() => {
+          setVista("favoritos");
+          cargarFavoritos();
+        }}>Favoritos ⭐</button>
+        <button onClick={() => {
+          setVista("outfits");
+          cargarOutfits();
+        }}>Outfits 👕</button>
+      </div>
+
+      {vista === "armario" && !cajonActual && (
         <>
           <div className="hero">
             <h2>Organiza tu armario fácilmente</h2>
@@ -122,7 +158,7 @@ function App() {
         </>
       )}
 
-      {cajonActual && (
+      {vista === "armario" && cajonActual && (
         <div className="fade-in">
           <div className="center-buttons">
             <button onClick={() => {
@@ -159,7 +195,7 @@ function App() {
             />
           </div>
 
-          {cajonActual && mostrarForm && (
+          {mostrarForm && (
             <Formulario
               cajon={cajonActual}
               onAdd={() => {
@@ -178,15 +214,48 @@ function App() {
                 p.marca.toLowerCase().includes(filtro.marca.toLowerCase())
               )
               .map(p => (
-                <PrendaCard
-                  key={p.id}
-                  prenda={p}
-                  onDelete={cargarPrendas}
-                  onFav={cargarPrendas}
-                />
+                <div key={p.id} onClick={() => toggleSeleccion(p.id)}>
+                  <PrendaCard
+                    prenda={p}
+                    onDelete={cargarPrendas}
+                    onFav={cargarPrendas}
+                  />
+                </div>
               ))}
           </div>
         </div>
+      )}
+
+      {vista === "favoritos" && (
+        <div className="prenda-container">
+          {favoritos.map(p => (
+            <PrendaCard
+              key={p.id}
+              prenda={p}
+              onDelete={cargarFavoritos}
+              onFav={cargarFavoritos}
+            />
+          ))}
+        </div>
+      )}
+
+      {vista === "outfits" && (
+        <>
+          <div className="center-buttons">
+            <button onClick={crearNuevoOutfit}>Crear outfit</button>
+          </div>
+
+          {outfits.map(o => (
+            <div key={o.id}>
+              <h3 style={{ textAlign: "center" }}>{o.nombre}</h3>
+              <div className="prenda-container">
+                {o.prendas.map(p => (
+                  <PrendaCard key={p.id} prenda={p} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
       )}
     </div>
   );
