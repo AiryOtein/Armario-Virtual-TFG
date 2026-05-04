@@ -42,59 +42,47 @@ h1 {
   color: #7a6a58;
 }
 
-.cajones {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 25px;
-  padding: 40px;
-}
-
-.cajon-card {
-  background: #d6bfa9;
-  height: 180px;
-  border-radius: 25px;
+.cajones-mini {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-
-.cajon-card:hover {
-  transform: scale(1.05);
-  background: #c2a58c;
-}
-
-.cajon-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.contador {
-  font-size: 0.9rem;
-  opacity: 0.7;
-}
-
-.cajon-card.add {
-  background: #cbb49d;
-  font-size: 2rem;
-  align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px;
 }
 
-.cajon-card.add:hover {
-  background: #b89d82;
+.cajon-chip {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+  cursor: pointer;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.cajon-chip span {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.cajon-chip:hover {
+  transform: scale(1.08);
+}
+
+.cajon-chip.activo {
+  background: #a67c52;
+  color: white;
+}
+
+.cajon-chip.add {
+  font-size: 1.2rem;
 }
 
 .delete-btn {
-  align-self: flex-end;
-  font-size: 0.8rem;
-  padding: 5px 10px;
+  font-size: 0.7rem;
+  padding: 4px 8px;
   background-color: #b85c5c;
   border-radius: 8px;
   border: none;
@@ -106,50 +94,52 @@ h1 {
   background-color: #9e4b4b;
 }
 
-.top-bar {
+.center-buttons {
   display: flex;
   justify-content: center;
-  align-items: center;
   gap: 15px;
-  margin: 20px auto;
+  margin: 20px 0;
   flex-wrap: wrap;
-  max-width: 900px;
 }
 
-.top-bar input,
-.top-bar select {
+button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #a67c52;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background-color: #8d6743;
+}
+
+.top-bar input {
   padding: 10px 14px;
   border-radius: 12px;
   border: none;
   background: #f3e8dc;
-  min-width: 120px;
-  transition: 0.2s;
 }
 
-.top-bar input:focus,
-.top-bar select:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #d6bfa9;
+body.dark .top-bar input {
+  background: #333;
+  color: white;
 }
 
 .prenda-container {
-  column-count: 3;
-  column-gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 240px));
+  justify-content: center;
+  gap: 20px;
   padding: 20px;
-}
-
-@media (max-width: 900px) {
-  .prenda-container { column-count: 2; }
-}
-
-@media (max-width: 500px) {
-  .prenda-container { column-count: 1; }
 }
 
 .prenda-card {
   position: relative;
-  width: 100%;
-  margin-bottom: 20px;
+  width: 240px;
+  height: 320px;
   border-radius: 20px;
   overflow: hidden;
   display: flex;
@@ -157,7 +147,7 @@ h1 {
   background: rgba(255,255,255,0.6);
   backdrop-filter: blur(10px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-  transition: 0.3s;
+  transition: 0.25s;
 }
 
 body.dark .prenda-card {
@@ -165,14 +155,24 @@ body.dark .prenda-card {
 }
 
 .prenda-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.prenda-card.seleccionada {
+  outline: 3px solid #a67c52;
+  transform: scale(1.03);
 }
 
 .prenda-card img {
   width: 100%;
-  height: 220px;
-  object-fit: cover;
-  display: block;
+  height: 200px;
+  object-fit: contain;
+  background: #fff;
+}
+
+body.dark .prenda-card img {
+  background: #222;
 }
 
 .prenda-actions {
@@ -192,30 +192,43 @@ body.dark .prenda-card {
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
-  backdrop-filter: blur(6px);
-  transition: 0.2s;
 }
 
 .prenda-actions button:hover {
   background: rgba(0,0,0,0.8);
 }
 
-.prenda-info {
-  width: 100%;
-  padding: 12px 14px;
+.check-overlay {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: #a67c52;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  font-size: 16px;
+}
+
+.prenda-info {
+  width: 100%;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.8rem;
   text-align: center;
+  gap: 6px;
 }
 
 .prenda-info span {
   background: rgba(0,0,0,0.06);
   padding: 5px 12px;
   border-radius: 999px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
@@ -241,26 +254,16 @@ body.dark .prenda-info span {
   background: #f3e8dc;
 }
 
-button {
-  padding: 10px 20px;
-  border: none;
-  background-color: #a67c52;
-  color: white;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  background-color: #8d6743;
-}
-
-body.dark .top-bar input,
-body.dark .top-bar select,
 body.dark .formulario input,
 body.dark .formulario select {
   background: #333;
   color: white;
+}
+
+.preview {
+  width: 120px;
+  border-radius: 10px;
+  margin-top: 10px;
 }
 
 .toggle-container {
@@ -321,78 +324,56 @@ input:checked + .slider:before {
   }
 }
 
-.center-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 20px 0;
-}
-
-.preview {
-  width: 120px;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-.outfits {
-  padding: 20px;
-}
-
-.outfit-card {
-  margin-bottom: 30px;
-  padding: 15px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.5);
-  backdrop-filter: blur(10px);
-}
-
-.outfit-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.outfit-grid img {
+.filtros-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-.cajones-mini {
+  height: 100%;
+  background: rgba(0,0,0,0.4);
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 20px;
-}
-
-.cajon-chip {
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.08);
-  cursor: pointer;
-  display: flex;
-  gap: 6px;
   align-items: center;
-  font-weight: 600;
-  transition: 0.2s;
+  z-index: 999;
 }
 
-.cajon-chip span {
-  font-size: 0.7rem;
-  opacity: 0.6;
+.filtros-panel {
+  background: #fff;
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.cajon-chip:hover {
-  transform: scale(1.05);
-}
-
-.cajon-chip.activo {
-  background: #a67c52;
+body.dark .filtros-panel {
+  background: #2c2c2c;
   color: white;
 }
 
-.cajon-chip.add {
-  font-size: 1.2rem;
+.filtros-panel input,
+.filtros-panel select {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #f3e8dc;
+}
+
+body.dark .filtros-panel input,
+body.dark .filtros-panel select {
+  background: #333;
+  color: white;
+}
+
+.filtros-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.filtros-actions button {
+  flex: 1;
+  margin: 5px;
 }

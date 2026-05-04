@@ -17,6 +17,7 @@ function App() {
   const [vista, setVista] = useState("armario");
   const [cajonesExtra, setCajonesExtra] = useState([]);
   const [filtro, setFiltro] = useState({ color: "", talla: "", marca: "" });
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const tallas = ["XXS","XS","S","M","L","XL","XXL"];
   const cajonesBase = ["camisetas", "pantalones", "zapatos", "vestidos"];
@@ -32,6 +33,7 @@ function App() {
   const cargarPrendas = async () => {
     const data = await getPrendas();
     setTodasPrendas(data);
+
     if (cajonActual) {
       setPrendas(data.filter(p => p.cajon === cajonActual));
     } else {
@@ -91,6 +93,15 @@ function App() {
     cargarOutfits();
   };
 
+  const filtrar = (p) => {
+    return (
+      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
+      p.color.toLowerCase().includes(filtro.color.toLowerCase()) &&
+      p.talla.toLowerCase().includes(filtro.talla.toLowerCase()) &&
+      p.marca.toLowerCase().includes(filtro.marca.toLowerCase())
+    );
+  };
+
   return (
     <div>
       <div className="toggle-container">
@@ -106,20 +117,26 @@ function App() {
 
       <div className="center-buttons">
         <button onClick={() => {
-  setVista("armario");
-  setCajonActual(null);
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}}>
-  Armario
-</button>
+          setVista("armario");
+          setCajonActual(null);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}>
+          Armario
+        </button>
+
         <button onClick={() => {
           setVista("favoritos");
           cargarFavoritos();
-        }}>Favoritos ⭐</button>
+        }}>
+          Favoritos ⭐
+        </button>
+
         <button onClick={() => {
           setVista("outfits");
           cargarOutfits();
-        }}>Outfits 👕</button>
+        }}>
+          Outfits 👕
+        </button>
       </div>
 
       {vista === "armario" && !cajonActual && (
@@ -160,56 +177,26 @@ function App() {
             <div className="cajon-chip add" onClick={crearCajon}>+</div>
           </div>
 
-          <div className="top-bar">
+          <div className="center-buttons">
             <input
-              placeholder="Buscar en todo..."
+              placeholder="Buscar..."
               onChange={(e) => setBusqueda(e.target.value)}
             />
-
-            <select onChange={(e) => setFiltro({ ...filtro, talla: e.target.value })}>
-              <option value="">Talla</option>
-              {tallas.map(t => <option key={t}>{t}</option>)}
-            </select>
-
-            <input
-              placeholder="Color"
-              onChange={(e) => setFiltro({ ...filtro, color: e.target.value })}
-            />
-
-            <input
-              placeholder="Marca"
-              onChange={(e) => setFiltro({ ...filtro, marca: e.target.value })}
-            />
+            <button onClick={() => setMostrarFiltros(true)}>Filtros</button>
           </div>
 
           <div className="prenda-container">
-            {todasPrendas
-              .filter(p =>
-                p.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
-                p.color.toLowerCase().includes(filtro.color.toLowerCase()) &&
-                p.talla.toLowerCase().includes(filtro.talla.toLowerCase()) &&
-                p.marca.toLowerCase().includes(filtro.marca.toLowerCase())
-              )
-              .map(p => (
-                <PrendaCard
-                  key={p.id}
-                  prenda={p}
-                  onDelete={() => {
-                    cargarPrendas();
-                    cargarFavoritos();
-                  }}
-                  onFav={() => {
-                    cargarPrendas();
-                    cargarFavoritos();
-                  }}
-                />
-              ))}
+            {todasPrendas.filter(filtrar).map(p => (
+              <PrendaCard key={p.id} prenda={p} onDelete={cargarPrendas} onFav={cargarPrendas} />
+            ))}
           </div>
         </>
       )}
 
       {vista === "armario" && cajonActual && (
         <div className="fade-in">
+          <h2 style={{ textAlign: "center" }}>{cajonActual.toUpperCase()}</h2>
+
           <div className="center-buttons">
             <button onClick={() => {
               setCajonActual(null);
@@ -223,27 +210,55 @@ function App() {
             </button>
           </div>
 
+          <div className="center-buttons">
+            <input
+              placeholder="Buscar..."
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+            <button onClick={() => setMostrarFiltros(true)}>Filtros</button>
+          </div>
+
           {mostrarForm && (
-          <Formulario
-            cajon={cajonActual}
-            onAdd={async () => {
-              await cargarPrendas();
-              setCajonActual(null);
-              setMostrarForm(false);
-            }}
-          />
+            <Formulario
+              cajon={cajonActual}
+              onAdd={async () => {
+                await cargarPrendas();
+                setMostrarForm(false);
+              }}
+            />
           )}
 
           <div className="prenda-container">
-            {prendas.map(p => (
+            {prendas.filter(filtrar).map(p => (
               <div key={p.id} onClick={() => toggleSeleccion(p.id)}>
-                <PrendaCard
-                  prenda={p}
-                  onDelete={cargarPrendas}
-                  onFav={cargarPrendas}
-                />
+                <PrendaCard prenda={p} onDelete={cargarPrendas} onFav={cargarPrendas} />
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {mostrarFiltros && (
+        <div className="filtros-overlay">
+          <div className="filtros-panel">
+            <h3>Filtros</h3>
+
+            <select onChange={(e) => setFiltro({ ...filtro, talla: e.target.value })}>
+              <option value="">Talla</option>
+              {tallas.map(t => <option key={t}>{t}</option>)}
+            </select>
+
+            <input placeholder="Color" onChange={(e) => setFiltro({ ...filtro, color: e.target.value })} />
+            <input placeholder="Marca" onChange={(e) => setFiltro({ ...filtro, marca: e.target.value })} />
+
+            <div className="filtros-actions">
+              <button onClick={() => setFiltro({ color: "", talla: "", marca: "" })}>
+                Limpiar
+              </button>
+              <button onClick={() => setMostrarFiltros(false)}>
+                Hecho
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -251,12 +266,7 @@ function App() {
       {vista === "favoritos" && (
         <div className="prenda-container">
           {favoritos.map(p => (
-            <PrendaCard
-              key={p.id}
-              prenda={p}
-              onDelete={cargarFavoritos}
-              onFav={cargarFavoritos}
-            />
+            <PrendaCard key={p.id} prenda={p} onDelete={cargarFavoritos} onFav={cargarFavoritos} />
           ))}
         </div>
       )}

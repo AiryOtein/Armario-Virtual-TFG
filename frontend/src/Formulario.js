@@ -2,7 +2,6 @@ import { useState } from "react";
 
 function Formulario({ onAdd, cajon }) {
   const [form, setForm] = useState({
-    nombre: "",
     tipo: "",
     color: "",
     talla: "",
@@ -27,17 +26,13 @@ function Formulario({ onAdd, cajon }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!cajon) {
-      alert("Selecciona un cajón antes de añadir la prenda");
-      return;
-    }
-
-    if (!form.nombre || !form.tipo || !form.color || !form.talla || !imagen) {
+    if (!form.tipo || !form.color || !form.talla || !imagen) {
       alert("Completa todos los campos");
       return;
     }
 
     const data = new FormData();
+    data.append("nombre", form.tipo);
     Object.keys(form).forEach(key => data.append(key, form[key]));
     data.append("cajon", cajon);
     data.append("imagen", imagen);
@@ -52,7 +47,6 @@ function Formulario({ onAdd, cajon }) {
 
   return (
     <form onSubmit={handleSubmit} className="formulario fade-in">
-      <input name="nombre" placeholder="Nombre" onChange={handleChange} />
       <input name="tipo" placeholder="Tipo" onChange={handleChange} />
       <input name="color" placeholder="Color" onChange={handleChange} />
 
