@@ -294,6 +294,7 @@ input:checked + .slider:before {
     opacity: 0;
     transform: translateY(15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -353,6 +354,7 @@ body.dark .filtros-panel select {
 .filtros-actions button {
   flex: none;
 }
+
 .formulario {
   display: flex;
   flex-direction: column;
@@ -361,15 +363,18 @@ body.dark .filtros-panel select {
   max-width: 400px;
   margin: auto;
 }
+
 .formulario {
   background: #fff;
   padding: 25px;
   border-radius: 20px;
 }
+
 body.dark .formulario {
   background: #2a211d;
   color: white;
 }
+
 select {
   padding: 12px 14px;
   border-radius: 12px;
@@ -623,8 +628,13 @@ body.dark .outfit-preview-tira {
   gap: 10px;
 }
 
-.outfit-filtros input  { flex: 1; }
-.outfit-filtros select { flex: 1; }
+.outfit-filtros input {
+  flex: 1;
+}
+
+.outfit-filtros select {
+  flex: 1;
+}
 
 .outfit-grid-selector {
   display: grid;
@@ -692,4 +702,63 @@ body.dark .outfit-prenda-item {
   flex-direction: column;
   gap: 2px;
   font-size: 0.8rem;
+}
+
+.dialogo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 16px;
+}
+
+.dialogo-panel {
+  background: #fdf6ee;
+  border-radius: 20px;
+  padding: 28px 28px 22px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+body.dark .dialogo-panel {
+  background: #2a211d;
+  color: #f5f1eb;
+}
+
+.dialogo-mensaje {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #3a2a1a;
+}
+
+body.dark .dialogo-mensaje {
+  color: #f0e8de;
+}
+
+.dialogo-panel input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dialogo-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-peligro {
+  background: #c0392b;
+  color: #fff;
+}
+
+.btn-peligro:hover {
+  background: #a93226;
 }
