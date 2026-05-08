@@ -1,37 +1,64 @@
-function PrendaCard({ prenda, onDelete, onFav }) {
+import { useState } from "react";
+import { updatePrenda, deletePrenda } from "./api";
+import EditarPrenda from "./EditarPrenda";
+
+function PrendaCard({ prenda, onDelete, onUpdate, cajones = [] }) {
+  const [editando, setEditando] = useState(false);
 
   const borrar = async (e) => {
     e.stopPropagation();
-    await fetch(`http://localhost/armario/backend/delete_prenda.php?id=${prenda.id}`);
+    if (!window.confirm("¿Borrar esta prenda?")) return;
+    await deletePrenda(prenda.id);
     onDelete && onDelete();
   };
 
   const toggleFav = async (e) => {
     e.stopPropagation();
-    await fetch(`http://localhost/armario/backend/favorito.php?id=${prenda.id}&fav=${prenda.favorito == 1 ? 0 : 1}`);
-    onFav && onFav();
+    await updatePrenda(prenda.id, { favorito: prenda.favorito == 1 ? 0 : 1 });
+    onUpdate && onUpdate();
   };
 
   return (
-    <div className="prenda-card">
-      <img
-        src={`http://localhost/armario/uploads/${prenda.imagen}`}
-        onError={(e) => e.target.style.display = "none"}
-      />
+    <>
+      <div className="prenda-card" onClick={(e) => e.stopPropagation()}>
+        <img
+          src={`http://localhost/armario/uploads/${prenda.imagen}`}
+          alt={prenda.nombre}
+          onError={(e) => (e.target.style.display = "none")}
+        />
 
-      <div className="prenda-actions">
-        <button onClick={toggleFav}>
-          {prenda.favorito == 1 ? "⭐" : "☆"}
-        </button>
-        <button onClick={borrar}>🗑️</button>
+        <div className="prenda-actions">
+          <button onClick={toggleFav} title="Favorito">
+            {prenda.favorito == 1 ? "⭐" : "☆"}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setEditando(true); }} title="Editar">
+            ✏️
+          </button>
+          <button onClick={borrar} title="Borrar">
+            🗑️
+          </button>
+        </div>
+
+        <div className="prenda-info">
+          {prenda.nombre && <span><strong>{prenda.nombre}</strong></span>}
+          {prenda.color  && <span>{prenda.color}</span>}
+          {prenda.talla  && <span>{prenda.talla}</span>}
+          {prenda.marca  && <span>{prenda.marca}</span>}
+          {prenda.cajon  && (
+            <span style={{ fontSize: 11, opacity: 0.6 }}>📦 {prenda.cajon}</span>
+          )}
+        </div>
       </div>
 
-      <div className="prenda-info">
-        <span>{prenda.color}</span>
-        <span>{prenda.talla}</span>
-        <span>{prenda.marca}</span>
-      </div>
-    </div>
+      {editando && (
+        <EditarPrenda
+          prenda={prenda}
+          cajones={cajones}
+          onGuardar={() => { setEditando(false); onUpdate && onUpdate(); }}
+          onCerrar={() => setEditando(false)}
+        />
+      )}
+    </>
   );
 }
 

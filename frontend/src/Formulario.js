@@ -1,43 +1,62 @@
 import { useState } from "react";
+const TALLAS_ROPA   = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
+const TALLAS_ZAPATO = Array.from({ length: 11 }, (_, i) => String(36 + i)); // 36–46
+
+const TIPOS_ZAPATO  = ["zapatos", "zapatillas", "botas", "sandalias", "tacones", "deportivas"];
+
+const COLORES_SUGERIDOS = [
+  "Negro", "Blanco", "Gris", "Beige", "Marrón",
+  "Rojo", "Rosa", "Naranja", "Amarillo", "Verde",
+  "Azul", "Morado", "Lila", "Azul marino", "Verde oliva",
+];
 
 function Formulario({ onAdd, cajon }) {
   const [form, setForm] = useState({
-    tipo: "",
+    tipo:  "",
     color: "",
     talla: "",
     marca: "",
   });
 
-  const [imagen, setImagen] = useState(null);
+  const [imagen,  setImagen]  = useState(null);
   const [preview, setPreview] = useState(null);
+  const [error,   setError]   = useState("");
 
-  const tallas = ["XXS","XS","S","M","L","XL","XXL"];
+  const esZapato = TIPOS_ZAPATO.includes(form.tipo.toLowerCase()) || cajon === "zapatos";
+  const tallas   = esZapato ? TALLAS_ZAPATO : TALLAS_ROPA;
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "tipo" ? { talla: "" } : {}),
+    }));
   };
 
   const handleImage = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
     setImagen(file);
     setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (!form.tipo || !form.color || !form.talla || !imagen) {
-      alert("Completa todos los campos");
+      setError("Completa todos los campos y añade una imagen.");
       return;
     }
 
     const data = new FormData();
     data.append("nombre", form.tipo);
-    Object.keys(form).forEach(key => data.append(key, form[key]));
-    data.append("cajon", cajon);
+    Object.keys(form).forEach((key) => data.append(key, form[key]));
+    data.append("cajon",  cajon);
     data.append("imagen", imagen);
 
-    await fetch("http://localhost/armario/backend/upload_prenda.php", {
+    await fetch("http://localhost/armario/backend/api.php?resource=prendas", {
       method: "POST",
       body: data,
     });
@@ -46,23 +65,80 @@ function Formulario({ onAdd, cajon }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="formulario fade-in">
-      <input name="tipo" placeholder="Tipo" onChange={handleChange} />
-      <input name="color" placeholder="Color" onChange={handleChange} />
+    <>
+      <form onSubmit={handleSubmit} className="formulario fade-in">
 
-      <select name="talla" onChange={handleChange}>
-        <option value="">Selecciona talla</option>
-        {tallas.map(t => <option key={t}>{t}</option>)}
-      </select>
+        <input
+          name="tipo"
+          placeholder="Tipo de prenda"
+          value={form.tipo}
+          onChange={handleChange}
+          list="tipos-list"
+          autoComplete="off"
+        />
+        <datalist id="tipos-list">
+          {["Camiseta", "Sudadera", "Chaqueta", "Abrigo", "Pantalón", "Vaqueros",
+            "Falda", "Vestido", "Zapatos", "Zapatillas", "Botas", "Sandalias",
+            "Tacones", "Deportivas", "Shorts", "Mono"].map((t) => (
+            <option key={t} value={t} />
+          ))}
+        </datalist>
 
-      <input name="marca" placeholder="Marca" onChange={handleChange} />
+        <input
+          name="color"
+          placeholder="Color"
+          value={form.color}
+          onChange={handleChange}
+          list="colores-list"
+          autoComplete="off"
+        />
+        <datalist id="colores-list">
+          {COLORES_SUGERIDOS.map((c) => <option key={c} value={c} />)}
+        </datalist>
 
-      <input type="file" onChange={handleImage} />
+        <select name="talla" value={form.talla} onChange={handleChange}>
+          <option value="">
+            {esZapato ? "Talla (36–46)" : "Talla (XXS–XXL)"}
+          </option>
+          {tallas.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
 
-      {preview && <img src={preview} className="preview" />}
+        <input
+          name="marca"
+          placeholder="Marca"
+          value={form.marca}
+          onChange={handleChange}
+          list="marcas-list"
+          autoComplete="off"
+        />
+        <datalist id="marcas-list">
+          {["Zara", "H&M", "Mango", "Pull&Bear", "Bershka", "Stradivarius",
+            "Nike", "Adidas", "New Balance", "Puma", "Vans", "Converse",
+            "Levi's", "COS", "& Other Stories"].map((m) => (
+            <option key={m} value={m} />
+          ))}
+        </datalist>
 
-      <button type="submit">Guardar</button>
-    </form>
+        <label className="file-label">
+          {imagen ? `📷 ${imagen.name}` : "Seleccionar imagen"}
+          <input type="file" accept="image/*" onChange={handleImage} />
+        </label>
+        {preview && (
+          <img
+            src={preview}
+            alt="preview"
+            className="preview"
+            style={{ borderRadius: 10, marginTop: 6 }}
+          />
+        )}
+
+        {error && (
+          <p style={{ color: "#e53e3e", fontSize: 13, margin: "4px 0" }}>{error}</p>
+        )}
+
+        <button type="submit">Guardar</button>
+      </form>
+    </>
   );
 }
 

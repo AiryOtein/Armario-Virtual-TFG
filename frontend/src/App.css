@@ -1,4 +1,4 @@
-html, body {
+body, html {
   min-height: 100%;
 }
 
@@ -345,11 +345,351 @@ body.dark .filtros-panel select {
 
 .filtros-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 10px;
   margin-top: 10px;
 }
 
 .filtros-actions button {
-  flex: 1;
-  margin: 5px;
+  flex: none;
+}
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+}
+.formulario {
+  background: #fff;
+  padding: 25px;
+  border-radius: 20px;
+}
+body.dark .formulario {
+  background: #2a211d;
+  color: white;
+}
+select {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #f3e8dc;
+  font-size: 0.95rem;
+  color: #4b3621;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a67c52' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+  width: 100%;
+}
+
+body.dark select {
+  background-color: #3a2f29;
+  color: #f5f1eb;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c9a87a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f3e8dc;
+  color: #4b3621;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1.5px dashed #c9a87a;
+}
+
+.file-label:hover {
+  background: #ede0d2;
+  border-color: #a67c52;
+}
+
+body.dark .file-label {
+  background: #3a2f29;
+  color: #f5f1eb;
+  border-color: #6b5243;
+}
+
+.file-label input[type="file"] {
+  display: none;
+}
+
+.formulario input,
+.formulario select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filtros-panel select {
+  background-color: #f3e8dc;
+  color: #4b3621;
+}
+
+body.dark .filtros-panel select {
+  background-color: #3a2f29;
+  color: #f5f1eb;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-panel {
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+.modal-panel--grande {
+  max-width: 640px;
+}
+
+body.dark .modal-panel {
+  background: #2a211d;
+  color: #f5f1eb;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: inherit;
+  padding: 4px 8px;
+  border-radius: 8px;
+  opacity: 0.6;
+}
+
+.modal-close:hover {
+  opacity: 1;
+  background: rgba(0,0,0,0.08);
+}
+
+.modal-imagen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-imagen img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: #f3e8dc;
+  padding: 8px;
+}
+
+body.dark .modal-imagen img {
+  background: #3a2f29;
+}
+
+.file-label--small {
+  font-size: 0.85rem;
+  padding: 8px 14px;
+}
+
+.modal-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-campos input,
+.modal-campos select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-error {
+  color: #c0392b;
+  font-size: 0.85rem;
+  margin: 0;
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.btn-secundario {
+  background: rgba(0,0,0,0.08);
+  color: inherit;
+}
+
+.btn-secundario:hover {
+  background: rgba(0,0,0,0.14);
+}
+
+body.dark .btn-secundario {
+  background: rgba(255,255,255,0.1);
+  color: #f5f1eb;
+}
+
+.outfit-contador {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.outfit-preview-tira {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 14px;
+}
+
+body.dark .outfit-preview-tira {
+  background: rgba(255,255,255,0.05);
+}
+
+.outfit-preview-item {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #a67c52;
+}
+
+.outfit-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.outfit-preview-remove {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  opacity: 0;
+  transition: 0.15s;
+}
+
+.outfit-preview-item:hover .outfit-preview-remove {
+  opacity: 1;
+}
+
+.outfit-filtros {
+  display: flex;
+  gap: 10px;
+}
+
+.outfit-filtros input  { flex: 1; }
+.outfit-filtros select { flex: 1; }
+
+.outfit-grid-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+.outfit-prenda-item {
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(0,0,0,0.05);
+  border: 2px solid transparent;
+  transition: 0.18s;
+  position: relative;
+}
+
+body.dark .outfit-prenda-item {
+  background: rgba(255,255,255,0.06);
+}
+
+.outfit-prenda-item:hover {
+  border-color: #a67c52;
+  transform: translateY(-2px);
+}
+
+.outfit-prenda-item.seleccionada {
+  border-color: #a67c52;
+  box-shadow: 0 0 0 3px rgba(166,124,82,0.3);
+}
+
+.outfit-prenda-item.deshabilitada {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.outfit-prenda-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.outfit-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #a67c52;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.outfit-prenda-info {
+  padding: 6px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
 }
