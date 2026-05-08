@@ -10,19 +10,22 @@ const COLORES_SUGERIDOS = [
   "Azul", "Morado", "Lila", "Azul marino", "Verde oliva",
 ];
 
-function Formulario({ onAdd, cajon }) {
+const CAJONES_BASE  = ["camisetas", "pantalones", "zapatos", "vestidos"];
+
+function Formulario({ onAdd, cajon, cajones = [] }) {
   const [form, setForm] = useState({
     tipo:  "",
     color: "",
     talla: "",
     marca: "",
+    cajon: cajon || "",
   });
 
   const [imagen,  setImagen]  = useState(null);
   const [preview, setPreview] = useState(null);
   const [error,   setError]   = useState("");
 
-  const esZapato = TIPOS_ZAPATO.includes(form.tipo.toLowerCase()) || cajon === "zapatos";
+  const esZapato = TIPOS_ZAPATO.includes(form.tipo.toLowerCase()) || form.cajon === "zapatos";
   const tallas   = esZapato ? TALLAS_ZAPATO : TALLAS_ROPA;
 
   const handleChange = (e) => {
@@ -50,10 +53,15 @@ function Formulario({ onAdd, cajon }) {
       return;
     }
 
+    if (!form.cajon) {
+      setError("Selecciona un cajón.");
+      return;
+    }
+
     const data = new FormData();
     data.append("nombre", form.tipo);
     Object.keys(form).forEach((key) => data.append(key, form[key]));
-    data.append("cajon",  cajon);
+    data.append("cajon",  form.cajon);
     data.append("imagen", imagen);
 
     await fetch("http://localhost/armario/backend/api.php?resource=prendas", {
@@ -67,6 +75,15 @@ function Formulario({ onAdd, cajon }) {
   return (
     <>
       <form onSubmit={handleSubmit} className="formulario fade-in">
+
+        {!cajon && (
+          <select name="cajon" value={form.cajon} onChange={handleChange}>
+            <option value="">Selecciona un cajón</option>
+            {[...new Set([...CAJONES_BASE, ...cajones])].map((c) => (
+              <option key={c} value={c}>{c.toUpperCase()}</option>
+            ))}
+          </select>
+        )}
 
         <input
           name="tipo"

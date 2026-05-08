@@ -294,7 +294,6 @@ input:checked + .slider:before {
     opacity: 0;
     transform: translateY(15px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -354,7 +353,6 @@ body.dark .filtros-panel select {
 .filtros-actions button {
   flex: none;
 }
-
 .formulario {
   display: flex;
   flex-direction: column;
@@ -363,18 +361,15 @@ body.dark .filtros-panel select {
   max-width: 400px;
   margin: auto;
 }
-
 .formulario {
   background: #fff;
   padding: 25px;
   border-radius: 20px;
 }
-
 body.dark .formulario {
   background: #2a211d;
   color: white;
 }
-
 select {
   padding: 12px 14px;
   border-radius: 12px;
@@ -628,13 +623,8 @@ body.dark .outfit-preview-tira {
   gap: 10px;
 }
 
-.outfit-filtros input {
-  flex: 1;
-}
-
-.outfit-filtros select {
-  flex: 1;
-}
+.outfit-filtros input  { flex: 1; }
+.outfit-filtros select { flex: 1; }
 
 .outfit-grid-selector {
   display: grid;
@@ -761,4 +751,77 @@ body.dark .dialogo-mensaje {
 
 .btn-peligro:hover {
   background: #a93226;
+}
+
+.filtros-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.filtros-panel {
+  background: #fdf6ee;
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px 32px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body.dark .filtros-panel {
+  background: #2a211d;
+  color: #f5f1eb;
+}
+
+.filtros-panel label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  margin-top: 6px;
+}
+
+.filtro-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.filtro-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.06);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.15s;
+  user-select: none;
+}
+
+body.dark .filtro-chip {
+  background: rgba(255,255,255,0.08);
+}
+
+.filtro-chip:hover {
+  background: rgba(166,124,82,0.2);
+}
+
+.filtro-chip.activo {
+  background: #a67c52;
+  color: #fff;
+}
+
+.filtros-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
