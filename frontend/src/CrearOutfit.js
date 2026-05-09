@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { getPrendas, crearOutfit } from "./api";
 
-const MAX_PRENDAS = 6;
+const MAX_PRENDAS = 8;
+const MIN_PRENDAS = 3;
 
 function CrearOutfit({ onCreado, onCerrar }) {
   const [todasPrendas, setTodasPrendas] = useState([]);
-  const [seleccion,    setSeleccion]    = useState([]);
+  const [seleccion,    setSeleccion]    = useState([]); // IDs seleccionados
   const [nombre,       setNombre]       = useState("");
   const [busqueda,     setBusqueda]     = useState("");
   const [filtroCajon,  setFiltroCajon]  = useState("");
@@ -41,8 +42,8 @@ function CrearOutfit({ onCreado, onCerrar }) {
   };
 
   const guardar = async () => {
-    if (!nombre.trim())       { setError("Ponle un nombre al outfit."); return; }
-    if (seleccion.length < 1) { setError("Selecciona al menos una prenda."); return; }
+    if (!nombre.trim())              { setError("Ponle un nombre al outfit."); return; }
+    if (seleccion.length < MIN_PRENDAS) { setError(`Selecciona al menos ${MIN_PRENDAS} prendas.`); return; }
 
     setGuardando(true);
     const res = await crearOutfit(nombre.trim(), seleccion);
@@ -73,7 +74,7 @@ function CrearOutfit({ onCreado, onCerrar }) {
 
         <div className="outfit-contador">
           <span>
-            {seleccion.length} / {MAX_PRENDAS} prendas seleccionadas
+            {seleccion.length} / {MAX_PRENDAS} prendas · mínimo {MIN_PRENDAS}
           </span>
           {seleccion.length > 0 && (
             <button
@@ -151,8 +152,8 @@ function CrearOutfit({ onCreado, onCerrar }) {
 
         <div className="modal-actions">
           <button onClick={onCerrar} className="btn-secundario">Cancelar</button>
-          <button onClick={guardar} disabled={guardando || seleccion.length === 0}>
-            {guardando ? "Guardando..." : `Guardar outfit (${seleccion.length})`}
+          <button onClick={guardar} disabled={guardando || seleccion.length < MIN_PRENDAS}>
+            {guardando ? "Guardando..." : `Guardar outfit (${seleccion.length}/${MIN_PRENDAS} mín.)`}
           </button>
         </div>
       </div>

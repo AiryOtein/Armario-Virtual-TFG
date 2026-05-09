@@ -16,9 +16,7 @@ export function Confirm({ mensaje, textoAceptar = "Eliminar", onAceptar, onCance
 
 export function Prompt({ mensaje, placeholder = "", onAceptar, onCancelar }) {
   const [valor, setValor] = useState("");
-
   const submit = () => { if (valor.trim()) onAceptar(valor.trim()); };
-
   return (
     <div className="dialogo-overlay" onClick={onCancelar}>
       <div className="dialogo-panel fade-in" onClick={(e) => e.stopPropagation()}>
@@ -40,15 +38,17 @@ export function Prompt({ mensaje, placeholder = "", onAceptar, onCancelar }) {
 }
 
 export function useDialogo() {
-  const [tipo,        setTipo]        = useState(null);
-  const [mensaje,     setMensaje]     = useState("");
-  const [placeholder, setPlaceholder] = useState("");
+  const [tipo,         setTipo]         = useState(null);
+  const [mensaje,      setMensaje]      = useState("");
+  const [placeholder,  setPlaceholder]  = useState("");
+  const [textoAceptar, setTextoAceptar] = useState("Eliminar");
   const resolveRef = useRef(null);
 
-  const confirmar = (msg) =>
+  const confirmar = (msg, textoBtn = "Eliminar") =>
     new Promise((resolve) => {
       resolveRef.current = resolve;
       setMensaje(msg);
+      setTextoAceptar(textoBtn);
       setTipo("confirm");
     });
 
@@ -69,6 +69,7 @@ export function useDialogo() {
   const dialogo = tipo === "confirm" ? (
     <Confirm
       mensaje={mensaje}
+      textoAceptar={textoAceptar}
       onAceptar={() => resolver(true)}
       onCancelar={() => resolver(false)}
     />

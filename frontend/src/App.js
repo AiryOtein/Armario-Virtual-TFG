@@ -156,7 +156,7 @@ function App() {
           <span className="header-usuario">Hola, {usuario.nombre}</span>
           <div className="header-separador" />
           <button className="btn-logout" onClick={async () => {
-            const ok = await confirmar("¿Cerrar sesión?");
+            const ok = await confirmar("¿Cerrar sesión?", "Cerrar sesión");
             if (ok) handleLogout();
           }}>
             Cerrar sesión
@@ -329,7 +329,7 @@ function App() {
                   </div>
                   <div className="outfit-prendas-grid">
                     {o.prendas.map((p) => (
-                      <PrendaCard key={p.id} prenda={p} />
+                      <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={() => { cargarPrendas(); cargarOutfits(); }} onUpdate={() => { cargarPrendas(); cargarOutfits(); }} />
                     ))}
                   </div>
                 </div>

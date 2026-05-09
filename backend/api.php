@@ -283,7 +283,12 @@ function handleCajones($conn, $method, $id, $uid) {
         $nombre = trim($body['nombre'] ?? '');
         if (!$nombre) { jsonError(400, "Falta el nombre"); return; }
 
-        $stmt = $conn->prepare("INSERT IGNORE INTO cajones (nombre, usuario_id) VALUES (?, ?)");
+        $check = $conn->prepare("SELECT id FROM cajones WHERE nombre = ? AND usuario_id = ?");
+        $check->bind_param("si", $nombre, $uid);
+        $check->execute();
+        if ($check->get_result()->num_rows > 0) { echo json_encode(["ok" => true]); return; }
+
+        $stmt = $conn->prepare("INSERT INTO cajones (nombre, usuario_id) VALUES (?, ?)");
         $stmt->bind_param("si", $nombre, $uid);
         echo json_encode(["ok" => $stmt->execute()]);
         return;

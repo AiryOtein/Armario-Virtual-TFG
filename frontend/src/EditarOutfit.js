@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getPrendas, updateOutfit } from "./api";
 
-const MAX_PRENDAS = 6;
+const MAX_PRENDAS = 8;
+const MIN_PRENDAS = 3;
 
 function EditarOutfit({ outfit, onGuardar, onCerrar }) {
   const [todasPrendas, setTodasPrendas] = useState([]);
@@ -37,8 +38,8 @@ function EditarOutfit({ outfit, onGuardar, onCerrar }) {
   };
 
   const guardar = async () => {
-    if (!nombre.trim())       { setError("El outfit necesita un nombre."); return; }
-    if (seleccion.length < 1) { setError("Selecciona al menos una prenda."); return; }
+    if (!nombre.trim())                  { setError("El outfit necesita un nombre."); return; }
+    if (seleccion.length < MIN_PRENDAS)  { setError(`Selecciona al menos ${MIN_PRENDAS} prendas.`); return; }
     setGuardando(true);
     const res = await updateOutfit(outfit.id, nombre.trim(), seleccion);
     setGuardando(false);
@@ -61,7 +62,7 @@ function EditarOutfit({ outfit, onGuardar, onCerrar }) {
         />
 
         <div className="outfit-contador">
-          <span>{seleccion.length} / {MAX_PRENDAS} prendas seleccionadas</span>
+          <span>{seleccion.length} / {MAX_PRENDAS} prendas · mínimo {MIN_PRENDAS}</span>
           {seleccion.length > 0 && (
             <button className="btn-secundario" style={{ padding: "4px 10px", fontSize: 12 }} onClick={() => setSeleccion([])}>
               Limpiar
@@ -117,7 +118,7 @@ function EditarOutfit({ outfit, onGuardar, onCerrar }) {
 
         <div className="modal-actions">
           <button onClick={onCerrar} className="btn-secundario">Cancelar</button>
-          <button onClick={guardar} disabled={guardando || seleccion.length === 0}>
+          <button onClick={guardar} disabled={guardando || seleccion.length < MIN_PRENDAS}>
             {guardando ? "Guardando..." : "Guardar cambios"}
           </button>
         </div>
