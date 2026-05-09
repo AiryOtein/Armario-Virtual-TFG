@@ -17,8 +17,8 @@ import { useDialogo } from "./Dialogo";
 import "./App.css";
 
 const CAJONES_BASE  = ["camisetas", "pantalones", "zapatos", "vestidos"];
-const COLORES_LISTA = ["Negro","Blanco","Gris","Beige","Marrón","Rojo","Rosa","Naranja","Amarillo","Verde","Azul","Morado","Lila","Azul marino","Verde oliva"];
-const MARCAS_LISTA  = ["Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius","Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","& Other Stories"];
+const COLORES_LISTA = ["Negro","Blanco","Gris","Beige","Marrón","Rojo","Rosa","Naranja","Amarillo","Verde","Azul","Morado","Lila"];
+const MARCAS_LISTA  = ["Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius","Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","& Otras Tiendas"];
 const TALLAS_ROPA   = ["XXS","XS","S","M","L","XL","XXL"];
 const TALLAS_ZAPATO = Array.from({ length: 11 }, (_, i) => String(36 + i));
 
@@ -91,55 +91,79 @@ function App() {
 
   const hayFiltrosActivos = filtrosActivos.color || filtrosActivos.talla || filtrosActivos.marca;
 
-  const filtrar = (p) =>
-    p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) &&
-    (!filtrosActivos.color || p.color?.toLowerCase() === filtrosActivos.color.toLowerCase()) &&
-    (!filtrosActivos.talla || p.talla?.toLowerCase() === filtrosActivos.talla.toLowerCase()) &&
-    (!filtrosActivos.marca || p.marca?.toLowerCase().includes(filtrosActivos.marca.toLowerCase()));
+  const filtrar = (p) => {
+    const q = busqueda.toLowerCase();
+    const coincideBusqueda = !q || (
+      p.nombre?.toLowerCase().includes(q) ||
+      p.color?.toLowerCase().includes(q)  ||
+      p.marca?.toLowerCase().includes(q)  ||
+      p.tipo?.toLowerCase().includes(q)   ||
+      p.talla?.toLowerCase().includes(q)  ||
+      p.cajon?.toLowerCase().includes(q)
+    );
+    return (
+      coincideBusqueda &&
+      (!filtrosActivos.color || p.color?.toLowerCase() === filtrosActivos.color.toLowerCase()) &&
+      (!filtrosActivos.talla || p.talla?.toLowerCase() === filtrosActivos.talla.toLowerCase()) &&
+      (!filtrosActivos.marca || p.marca?.toLowerCase().includes(filtrosActivos.marca.toLowerCase()))
+    );
+  };
 
   return (
-    <div>
-      <div className="toggle-container">
-        <span>☀️</span>
-        <label className="switch">
-          <input type="checkbox" onChange={() => setModo(modo === "light" ? "dark" : "light")} />
-          <span className="slider"></span>
-        </label>
-        <span>🌙</span>
-      </div>
+    <div className="app-wrapper">
 
-      <h1>Armario Virtual</h1>
+      <header className="app-header">
+        <div className="app-header-logo">
+          <span className="app-header-title">Tu Armario Vitual</span>
+        </div>
+        <nav className="app-nav">
+          {[["armario","Armario"], ["favoritos","Favoritos"], ["outfits","Outfits"]].map(([v, label]) => (
+            <button
+              key={v}
+              className={`nav-btn ${vista === v ? "nav-btn--activo" : ""}`}
+              onClick={() => {
+                setVista(v);
+                setCajonActual(null);
+                if (v === "favoritos") cargarFavoritos();
+                if (v === "outfits")   cargarOutfits();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="app-header-right">
+          <div className="toggle-container">
+            <span>☀️</span>
+            <label className="switch">
+              <input type="checkbox" onChange={() => setModo(modo === "light" ? "dark" : "light")} />
+              <span className="slider"></span>
+            </label>
+            <span>🌙</span>
+          </div>
+        </div>
+      </header>
 
-      <div className="center-buttons">
-        <button onClick={() => { setVista("armario"); setCajonActual(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-          Armario
-        </button>
-        <button onClick={() => { setVista("favoritos"); cargarFavoritos(); }}>
-          Favoritos
-        </button>
-        <button onClick={() => { setVista("outfits"); cargarOutfits(); }}>
-          Outfits
-        </button>
-      </div>
+      <main className="app-main">
 
       {vista === "armario" && !cajonActual && (
         <>
-          <div className="hero">
-            <h2>Organiza tu armario fácilmente</h2>
-          </div>
+          <section className="hero">
+            <h1 className="hero-title">Tu armario, organizado.</h1>
+            <p className="hero-sub">{todasPrendas.length} prendas guardadas</p>
+          </section>
 
           <div className="cajones-mini">
             {cajones.map((c) => {
               const cantidad = todasPrendas.filter((p) => p.cajon === c).length;
               const esBase   = CAJONES_BASE.includes(c);
               return (
-                <div key={c} className="cajon-chip" onClick={() => setCajonActual(c)}>
+                <div key={c} className={`cajon-chip${!esBase ? " cajon-chip--borrable" : ""}`} onClick={() => setCajonActual(c)}>
                   {c.toUpperCase()}
                   <span>{cantidad}</span>
                   {!esBase && (
-                    <button className="delete-btn" onClick={(e) => { e.stopPropagation(); borrarCajon(c); }}>
-                      🗑️
-                    </button>
+                    <span className="cajon-chip-x" onClick={(e) => { e.stopPropagation(); borrarCajon(c); }}>✕</span>
                   )}
                 </div>
               );
@@ -147,16 +171,20 @@ function App() {
             <div className="cajon-chip add" onClick={crearCajonNuevo}>+</div>
           </div>
 
-          <div className="center-buttons">
-            <button onClick={() => setMostrarFormGlobal((prev) => !prev)}>
-              Añadir prenda +
-            </button>
-            <input placeholder="Buscar..." onChange={(e) => setBusqueda(e.target.value)} />
+          <div className="barra-acciones">
+            <input
+              className="input-busqueda"
+              placeholder="Buscar por nombre, color, marca..."
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
             <button
+              className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`}
               onClick={() => setMostrarFiltros(true)}
-              style={hayFiltrosActivos ? { outline: "2px solid #a67c52" } : {}}
             >
-              {hayFiltrosActivos ? "Filtros ●" : "Filtros"}
+              ⚙ Filtros {hayFiltrosActivos ? "●" : ""}
+            </button>
+            <button className="btn-añadir" onClick={() => setMostrarFormGlobal((prev) => !prev)}>
+              + Añadir prenda
             </button>
           </div>
 
@@ -178,24 +206,29 @@ function App() {
 
       {vista === "armario" && cajonActual && (
         <div className="fade-in">
-          <h2 style={{ textAlign: "center" }}>{cajonActual.toUpperCase()}</h2>
-
-          <div className="center-buttons">
-            <button onClick={() => { setCajonActual(null); setMostrarForm(false); }}>
-              ⬅ Volver
-            </button>
-            <button onClick={() => setMostrarForm((prev) => !prev)}>
-              Añadir prenda +
-            </button>
+          <div className="cajon-header">
+            <h2 className="cajon-titulo">{cajonActual.toUpperCase()}</h2>
+            <div className="cajon-header-botones">
+              <button className="btn-volver" onClick={() => { setCajonActual(null); setMostrarForm(false); }}>
+                ← Volver
+              </button>
+              <button className="btn-añadir" onClick={() => setMostrarForm((prev) => !prev)}>
+                + Añadir prenda
+              </button>
+            </div>
           </div>
 
-          <div className="center-buttons">
-            <input placeholder="Buscar..." onChange={(e) => setBusqueda(e.target.value)} />
+          <div className="barra-acciones">
+            <input
+              className="input-busqueda"
+              placeholder="Buscar por nombre, color, marca..."
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
             <button
+              className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`}
               onClick={() => setMostrarFiltros(true)}
-              style={hayFiltrosActivos ? { outline: "2px solid #a67c52" } : {}}
             >
-              {hayFiltrosActivos ? "Filtros ●" : "Filtros"}
+              ⚙ Filtros {hayFiltrosActivos ? "●" : ""}
             </button>
           </div>
 
@@ -297,7 +330,7 @@ function App() {
       {vista === "outfits" && (
         <>
           <div className="center-buttons">
-            <button onClick={() => setMostrarCrearOutfit(true)}>✨ Crear outfit</button>
+            <button onClick={() => setMostrarCrearOutfit(true)}>Crear outfit</button>
           </div>
 
           {outfits.length === 0
@@ -328,6 +361,7 @@ function App() {
       )}
 
       {dialogo}
+      </main>
     </div>
   );
 }

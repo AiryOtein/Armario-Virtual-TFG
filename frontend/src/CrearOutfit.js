@@ -60,7 +60,7 @@ function CrearOutfit({ onCreado, onCerrar }) {
       <div className="modal-panel modal-panel--grande fade-in" onClick={(e) => e.stopPropagation()}>
 
         <div className="modal-header">
-          <h3>✨ Crear outfit</h3>
+          <h3>Crear outfit</h3>
           <button className="modal-close" onClick={onCerrar}>✕</button>
         </div>
 
