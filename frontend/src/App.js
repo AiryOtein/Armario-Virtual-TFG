@@ -1,28 +1,23 @@
 import { useEffect, useState } from "react";
-import {
-  getPrendas,
-  getFavoritos,
-  getOutfits,
-  getCajones,
-  crearOutfit,
-  deleteOutfit,
-  deleteCajon,
-  crearCajon,
-  updatePrenda,
-} from "./api";
+import { getPrendas, getFavoritos, getOutfits, getCajones, deleteOutfit, deleteCajon, crearCajon, getSesion, logout } from "./api";
 import PrendaCard from "./PrendaCard";
 import Formulario from "./Formulario";
 import CrearOutfit from "./CrearOutfit";
+import EditarOutfit from "./EditarOutfit";
+import Login from "./Login";
 import { useDialogo } from "./Dialogo";
 import "./App.css";
 
 const CAJONES_BASE  = ["camisetas", "pantalones", "zapatos", "vestidos"];
-const COLORES_LISTA = ["Negro","Blanco","Gris","Beige","Marrón","Rojo","Rosa","Naranja","Amarillo","Verde","Azul","Morado","Lila"];
-const MARCAS_LISTA  = ["Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius","Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","& Otras Tiendas"];
+const COLORES_LISTA = ["Negro","Blanco","Gris","Beige","Marrón","Rojo","Rosa","Naranja","Amarillo","Verde","Azul","Morado","Lila","Azul marino","Verde oliva"];
+const MARCAS_LISTA  = ["Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius","Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","& Other Stories"];
 const TALLAS_ROPA   = ["XXS","XS","S","M","L","XL","XXL"];
 const TALLAS_ZAPATO = Array.from({ length: 11 }, (_, i) => String(36 + i));
 
 function App() {
+  const [usuario,      setUsuario]      = useState(null);
+  const [cargandoSes,  setCargandoSes]  = useState(true);
+
   const [todasPrendas, setTodasPrendas] = useState([]);
   const [prendas,      setPrendas]      = useState([]);
   const [favoritos,    setFavoritos]    = useState([]);
@@ -37,6 +32,7 @@ function App() {
   const [filtrosActivos,     setFiltrosActivos]     = useState({ color: "", talla: "", marca: "" });
   const [mostrarFiltros,     setMostrarFiltros]     = useState(false);
   const [mostrarCrearOutfit, setMostrarCrearOutfit] = useState(false);
+  const [editandoOutfit,     setEditandoOutfit]     = useState(null);
   const [modo,               setModo]               = useState("light");
   const [vista,              setVista]              = useState("armario");
 
@@ -44,19 +40,44 @@ function App() {
 
   const cajones = [...new Set([...CAJONES_BASE, ...cajonesDB.map((c) => c.nombre)])];
 
+  useEffect(() => {
+    getSesion().then((data) => {
+      if (data.ok) setUsuario({ id: data.id, nombre: data.nombre });
+      setCargandoSes(false);
+    });
+  }, []);
+
+  useEffect(() => { document.body.className = modo; }, [modo]);
+
+  useEffect(() => {
+    if (usuario) { cargarPrendas(); cargarCajones(); }
+  }, [usuario]);
+
+  useEffect(() => {
+    if (usuario) cargarPrendas();
+  }, [cajonActual]);
+
   const cargarPrendas = async () => {
     const data = await getPrendas();
-    setTodasPrendas(data);
-    if (cajonActual) setPrendas(data.filter((p) => p.cajon === cajonActual));
+    const lista = Array.isArray(data) ? data : [];
+    setTodasPrendas(lista);
+    if (cajonActual) setPrendas(lista.filter((p) => p.cajon === cajonActual));
   };
 
-  const cargarFavoritos = async () => setFavoritos(await getFavoritos());
-  const cargarOutfits   = async () => setOutfits(await getOutfits());
-  const cargarCajones   = async () => setCajonesDB(await getCajones());
+  const cargarFavoritos = async () => {
+    const data = await getFavoritos();
+    setFavoritos(Array.isArray(data) ? data : []);
+  };
 
-  useEffect(() => { cargarPrendas(); cargarCajones(); }, []);
-  useEffect(() => { cargarPrendas(); }, [cajonActual]);
-  useEffect(() => { document.body.className = modo; }, [modo]);
+  const cargarOutfits = async () => {
+    const data = await getOutfits();
+    setOutfits(Array.isArray(data) ? data : []);
+  };
+
+  const cargarCajones = async () => {
+    const data = await getCajones();
+    setCajonesDB(Array.isArray(data) ? data : []);
+  };
 
   const crearCajonNuevo = async () => {
     const nuevo = await pedir("Nombre del nuevo cajón:", "ej: verano");
@@ -68,8 +89,7 @@ function App() {
     if (!ok) return;
     await deleteCajon(c);
     if (cajonActual === c) setCajonActual(null);
-    cargarPrendas();
-    cargarCajones();
+    cargarPrendas(); cargarCajones();
   };
 
   const borrarOutfit = async (id) => {
@@ -79,27 +99,16 @@ function App() {
     cargarOutfits();
   };
 
-  const aplicarFiltros = () => {
-    setFiltrosActivos({ ...filtro });
-    setMostrarFiltros(false);
-  };
-
-  const limpiarFiltros = () => {
-    setFiltro({ color: "", talla: "", marca: "" });
-    setFiltrosActivos({ color: "", talla: "", marca: "" });
-  };
-
+  const aplicarFiltros = () => { setFiltrosActivos({ ...filtro }); setMostrarFiltros(false); };
+  const limpiarFiltros = () => { setFiltro({ color: "", talla: "", marca: "" }); setFiltrosActivos({ color: "", talla: "", marca: "" }); };
   const hayFiltrosActivos = filtrosActivos.color || filtrosActivos.talla || filtrosActivos.marca;
 
   const filtrar = (p) => {
     const q = busqueda.toLowerCase();
     const coincideBusqueda = !q || (
-      p.nombre?.toLowerCase().includes(q) ||
-      p.color?.toLowerCase().includes(q)  ||
-      p.marca?.toLowerCase().includes(q)  ||
-      p.tipo?.toLowerCase().includes(q)   ||
-      p.talla?.toLowerCase().includes(q)  ||
-      p.cajon?.toLowerCase().includes(q)
+      p.nombre?.toLowerCase().includes(q) || p.color?.toLowerCase().includes(q) ||
+      p.marca?.toLowerCase().includes(q)  || p.tipo?.toLowerCase().includes(q)  ||
+      p.talla?.toLowerCase().includes(q)  || p.cajon?.toLowerCase().includes(q)
     );
     return (
       coincideBusqueda &&
@@ -109,12 +118,23 @@ function App() {
     );
   };
 
+  const handleLogout = async () => {
+    await logout();
+    localStorage.removeItem("armario_token");
+    setUsuario(null);
+    setTodasPrendas([]); setPrendas([]); setFavoritos([]); setOutfits([]); setCajonesDB([]);
+    setCajonActual(null); setVista("armario");
+  };
+
+  if (cargandoSes) return <div className="login-fondo"><p style={{ color: "#a67c52" }}>Cargando...</p></div>;
+  if (!usuario)    return <Login onLogin={setUsuario} />;
+
   return (
     <div className="app-wrapper">
 
       <header className="app-header">
         <div className="app-header-logo">
-          <span className="app-header-title">Tu Armario Vitual</span>
+          <span className="app-header-title">Tu armario virtual</span>
         </div>
         <nav className="app-nav">
           {[["armario","Armario"], ["favoritos","Favoritos"], ["outfits","Outfits"]].map(([v, label]) => (
@@ -122,8 +142,7 @@ function App() {
               key={v}
               className={`nav-btn ${vista === v ? "nav-btn--activo" : ""}`}
               onClick={() => {
-                setVista(v);
-                setCajonActual(null);
+                setVista(v); setCajonActual(null);
                 if (v === "favoritos") cargarFavoritos();
                 if (v === "outfits")   cargarOutfits();
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -134,233 +153,204 @@ function App() {
           ))}
         </nav>
         <div className="app-header-right">
+          <span className="header-usuario">Hola, {usuario.nombre}</span>
+          <div className="header-separador" />
+          <button className="btn-logout" onClick={async () => {
+            const ok = await confirmar("¿Cerrar sesión?");
+            if (ok) handleLogout();
+          }}>
+            Cerrar sesión
+          </button>
+          <div className="header-separador" />
           <div className="toggle-container">
-            <span>☀️</span>
+            <span>☀</span>
             <label className="switch">
               <input type="checkbox" onChange={() => setModo(modo === "light" ? "dark" : "light")} />
               <span className="slider"></span>
             </label>
-            <span>🌙</span>
+            <span>☽</span>
           </div>
         </div>
       </header>
 
       <main className="app-main">
 
-      {vista === "armario" && !cajonActual && (
-        <>
-          <section className="hero">
-            <h1 className="hero-title">Tu armario, organizado.</h1>
-            <p className="hero-sub">{todasPrendas.length} prendas guardadas</p>
-          </section>
+        {vista === "armario" && !cajonActual && (
+          <>
+            <section className="hero">
+              <h1 className="hero-title">Tu armario, organizado.</h1>
+              <p className="hero-sub">{todasPrendas.length} prendas guardadas</p>
+            </section>
 
-          <div className="cajones-mini">
-            {cajones.map((c) => {
-              const cantidad = todasPrendas.filter((p) => p.cajon === c).length;
-              const esBase   = CAJONES_BASE.includes(c);
-              return (
-                <div key={c} className={`cajon-chip${!esBase ? " cajon-chip--borrable" : ""}`} onClick={() => setCajonActual(c)}>
-                  {c.toUpperCase()}
-                  <span>{cantidad}</span>
-                  {!esBase && (
-                    <span className="cajon-chip-x" onClick={(e) => { e.stopPropagation(); borrarCajon(c); }}>✕</span>
-                  )}
-                </div>
-              );
-            })}
-            <div className="cajon-chip add" onClick={crearCajonNuevo}>+</div>
-          </div>
+            <div className="cajones-mini">
+              {cajones.map((c) => {
+                const cantidad = todasPrendas.filter((p) => p.cajon === c).length;
+                const esBase   = CAJONES_BASE.includes(c);
+                return (
+                  <div key={c} className={`cajon-chip${!esBase ? " cajon-chip--borrable" : ""}`} onClick={() => setCajonActual(c)}>
+                    {c.toUpperCase()}
+                    <span>{cantidad}</span>
+                    {!esBase && (
+                      <span className="cajon-chip-x" onClick={(e) => { e.stopPropagation(); borrarCajon(c); }}>✕</span>
+                    )}
+                  </div>
+                );
+              })}
+              <div className="cajon-chip add" onClick={crearCajonNuevo}>+</div>
+            </div>
 
-          <div className="barra-acciones">
-            <input
-              className="input-busqueda"
-              placeholder="Buscar por nombre, color, marca..."
-              onChange={(e) => setBusqueda(e.target.value)}
-            />
-            <button
-              className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`}
-              onClick={() => setMostrarFiltros(true)}
-            >
-              ⚙ Filtros {hayFiltrosActivos ? "●" : ""}
-            </button>
-            <button className="btn-añadir" onClick={() => setMostrarFormGlobal((prev) => !prev)}>
-              + Añadir prenda
-            </button>
-          </div>
-
-          {mostrarFormGlobal && (
-            <Formulario
-              cajon=""
-              cajones={cajones}
-              onAdd={async () => { await cargarPrendas(); setMostrarFormGlobal(false); }}
-            />
-          )}
-
-          <div className="prenda-container">
-            {todasPrendas.filter(filtrar).map((p) => (
-              <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={cargarPrendas} />
-            ))}
-          </div>
-        </>
-      )}
-
-      {vista === "armario" && cajonActual && (
-        <div className="fade-in">
-          <div className="cajon-header">
-            <h2 className="cajon-titulo">{cajonActual.toUpperCase()}</h2>
-            <div className="cajon-header-botones">
-              <button className="btn-volver" onClick={() => { setCajonActual(null); setMostrarForm(false); }}>
-                ← Volver
+            <div className="barra-acciones">
+              <input className="input-busqueda" placeholder="Buscar por nombre, color, marca..." onChange={(e) => setBusqueda(e.target.value)} />
+              <button className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`} onClick={() => setMostrarFiltros(true)}>
+                Filtros {hayFiltrosActivos ? "●" : ""}
               </button>
-              <button className="btn-añadir" onClick={() => setMostrarForm((prev) => !prev)}>
+              <button className="btn-añadir" onClick={() => setMostrarFormGlobal((prev) => !prev)}>
                 + Añadir prenda
               </button>
             </div>
-          </div>
 
-          <div className="barra-acciones">
-            <input
-              className="input-busqueda"
-              placeholder="Buscar por nombre, color, marca..."
-              onChange={(e) => setBusqueda(e.target.value)}
-            />
-            <button
-              className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`}
-              onClick={() => setMostrarFiltros(true)}
-            >
-              ⚙ Filtros {hayFiltrosActivos ? "●" : ""}
-            </button>
-          </div>
+            {mostrarFormGlobal && (
+              <Formulario cajon="" cajones={cajones} onAdd={async () => { await cargarPrendas(); setMostrarFormGlobal(false); }} />
+            )}
 
-          {mostrarForm && (
-            <Formulario
-              cajon={cajonActual}
-              cajones={cajones}
-              onAdd={async () => { await cargarPrendas(); setMostrarForm(false); }}
-            />
-          )}
-
-          <div className="prenda-container">
-            {prendas.filter(filtrar).map((p) => (
-              <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={cargarPrendas} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {mostrarFiltros && (
-        <div className="filtros-overlay" onClick={() => setMostrarFiltros(false)}>
-          <div className="filtros-panel" onClick={(e) => e.stopPropagation()}>
-            <h3>Filtros</h3>
-
-            <label>Color</label>
-            <div className="filtro-chips">
-              {COLORES_LISTA.map((c) => (
-                <div
-                  key={c}
-                  className={`filtro-chip ${filtro.color === c ? "activo" : ""}`}
-                  onClick={() => setFiltro({ ...filtro, color: filtro.color === c ? "" : c })}
-                >
-                  {c}
-                </div>
+            <div className="prenda-container">
+              {todasPrendas.filter(filtrar).map((p) => (
+                <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={cargarPrendas} />
               ))}
             </div>
+          </>
+        )}
 
-            <label>Talla — Ropa</label>
-            <div className="filtro-chips">
-              {TALLAS_ROPA.map((t) => (
-                <div
-                  key={t}
-                  className={`filtro-chip ${filtro.talla === t ? "activo" : ""}`}
-                  onClick={() => setFiltro({ ...filtro, talla: filtro.talla === t ? "" : t })}
-                >
-                  {t}
-                </div>
-              ))}
+        {vista === "armario" && cajonActual && (
+          <div className="fade-in">
+            <div className="cajon-header">
+              <h2 className="cajon-titulo">{cajonActual.toUpperCase()}</h2>
+              <div className="cajon-header-botones">
+                <button className="btn-volver" onClick={() => { setCajonActual(null); setMostrarForm(false); }}>← Volver</button>
+                <button className="btn-añadir" onClick={() => setMostrarForm((prev) => !prev)}>+ Añadir prenda</button>
+              </div>
             </div>
 
-            <label>Talla — Zapatos</label>
-            <div className="filtro-chips">
-              {TALLAS_ZAPATO.map((t) => (
-                <div
-                  key={t}
-                  className={`filtro-chip ${filtro.talla === t ? "activo" : ""}`}
-                  onClick={() => setFiltro({ ...filtro, talla: filtro.talla === t ? "" : t })}
-                >
-                  {t}
-                </div>
-              ))}
+            <div className="barra-acciones">
+              <input className="input-busqueda" placeholder="Buscar por nombre, color, marca..." onChange={(e) => setBusqueda(e.target.value)} />
+              <button className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`} onClick={() => setMostrarFiltros(true)}>
+                Filtros {hayFiltrosActivos ? "●" : ""}
+              </button>
             </div>
 
-            <label>Marca</label>
-            <div className="filtro-chips">
-              {MARCAS_LISTA.map((m) => (
-                <div
-                  key={m}
-                  className={`filtro-chip ${filtro.marca === m ? "activo" : ""}`}
-                  onClick={() => setFiltro({ ...filtro, marca: filtro.marca === m ? "" : m })}
-                >
-                  {m}
-                </div>
-              ))}
-            </div>
+            {mostrarForm && (
+              <Formulario cajon={cajonActual} cajones={cajones} onAdd={async () => { await cargarPrendas(); setMostrarForm(false); }} />
+            )}
 
-            <div className="filtros-actions">
-              <button className="btn-secundario" onClick={limpiarFiltros}>Limpiar</button>
-              <button onClick={aplicarFiltros}>Aplicar</button>
+            <div className="prenda-container">
+              {prendas.filter(filtrar).map((p) => (
+                <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={cargarPrendas} />
+              ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {vista === "favoritos" && (
-        <>
-          {favoritos.length === 0
-            ? <p style={{ textAlign: "center", marginTop: 40 }}>No tienes prendas favoritas aún ⭐</p>
-            : (
-              <div className="prenda-container">
-                {favoritos.map((p) => (
-                  <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarFavoritos} onUpdate={cargarFavoritos} />
+        {mostrarFiltros && (
+          <div className="filtros-overlay" onClick={() => setMostrarFiltros(false)}>
+            <div className="filtros-panel" onClick={(e) => e.stopPropagation()}>
+              <h3 style={{ margin: "0 0 4px" }}>Filtros</h3>
+
+              <label>Color</label>
+              <div className="filtro-chips">
+                {COLORES_LISTA.map((c) => (
+                  <div key={c} className={`filtro-chip ${filtro.color === c ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, color: filtro.color === c ? "" : c })}>{c}</div>
                 ))}
               </div>
-            )}
-        </>
-      )}
 
-      {vista === "outfits" && (
-        <>
-          <div className="center-buttons">
-            <button onClick={() => setMostrarCrearOutfit(true)}>Crear outfit</button>
+              <label>Talla — Ropa</label>
+              <div className="filtro-chips">
+                {TALLAS_ROPA.map((t) => (
+                  <div key={t} className={`filtro-chip ${filtro.talla === t ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, talla: filtro.talla === t ? "" : t })}>{t}</div>
+                ))}
+              </div>
+
+              <label>Talla — Zapatos</label>
+              <div className="filtro-chips">
+                {TALLAS_ZAPATO.map((t) => (
+                  <div key={t} className={`filtro-chip ${filtro.talla === t ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, talla: filtro.talla === t ? "" : t })}>{t}</div>
+                ))}
+              </div>
+
+              <label>Marca</label>
+              <div className="filtro-chips">
+                {MARCAS_LISTA.map((m) => (
+                  <div key={m} className={`filtro-chip ${filtro.marca === m ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, marca: filtro.marca === m ? "" : m })}>{m}</div>
+                ))}
+              </div>
+
+              <div className="filtros-actions">
+                <button className="btn-secundario" onClick={limpiarFiltros}>Limpiar</button>
+                <button onClick={aplicarFiltros}>Aplicar</button>
+              </div>
+            </div>
           </div>
+        )}
 
-          {outfits.length === 0
-            ? <p style={{ textAlign: "center", marginTop: 40 }}>No hay outfits todavía 👗</p>
-            : outfits.map((o) => (
-              <div key={o.id}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                  <h3 style={{ textAlign: "center" }}>{o.nombre}</h3>
-                  <button onClick={() => borrarOutfit(o.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16 }}>
-                    🗑️
-                  </button>
-                </div>
-                <div className="prenda-container">
-                  {o.prendas.map((p) => (
-                    <PrendaCard key={p.id} prenda={p} />
+        {vista === "favoritos" && (
+          <div className="fade-in">
+            <section className="vista-seccion">
+              <h2 className="vista-titulo">Favoritos</h2>
+              <p className="vista-sub">Las prendas que más te gustan, siempre a mano.</p>
+            </section>
+            {favoritos.length === 0
+              ? <p className="vista-vacia">Todavía no tienes prendas marcadas como favoritas. Pulsa la estrella en cualquier prenda para añadirla aquí.</p>
+              : <div className="prenda-container">
+                  {favoritos.map((p) => (
+                    <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarFavoritos} onUpdate={cargarFavoritos} />
                   ))}
                 </div>
-              </div>
-            ))}
+            }
+          </div>
+        )}
 
-          {mostrarCrearOutfit && (
-            <CrearOutfit
-              onCreado={() => { setMostrarCrearOutfit(false); cargarOutfits(); }}
-              onCerrar={() => setMostrarCrearOutfit(false)}
-            />
-          )}
-        </>
-      )}
+        {vista === "outfits" && (
+          <div className="fade-in">
+            <section className="vista-seccion">
+              <h2 className="vista-titulo">Outfits</h2>
+              <p className="vista-sub">Combina tus prendas y guarda tus looks favoritos.</p>
+              <button className="btn-añadir" onClick={() => setMostrarCrearOutfit(true)}>+ Crear outfit</button>
+            </section>
 
-      {dialogo}
+            {outfits.length === 0
+              ? <p className="vista-vacia">Aún no has creado ningún outfit. Pulsa el botón de arriba para empezar a combinar prendas.</p>
+              : outfits.map((o) => (
+                <div key={o.id} className="outfit-bloque">
+                  <div className="outfit-bloque-header">
+                    <h3 className="outfit-bloque-nombre">{o.nombre}</h3>
+                    <div className="outfit-bloque-acciones">
+                      <button className="btn-secundario" onClick={() => setEditandoOutfit(o)}>Editar</button>
+                      <button className="btn-peligro"    onClick={() => borrarOutfit(o.id)}>Eliminar</button>
+                    </div>
+                  </div>
+                  <div className="outfit-prendas-grid">
+                    {o.prendas.map((p) => (
+                      <PrendaCard key={p.id} prenda={p} />
+                    ))}
+                  </div>
+                </div>
+              ))
+            }
+
+            {mostrarCrearOutfit && (
+              <CrearOutfit onCreado={() => { setMostrarCrearOutfit(false); cargarOutfits(); }} onCerrar={() => setMostrarCrearOutfit(false)} />
+            )}
+
+            {editandoOutfit && (
+              <EditarOutfit
+                outfit={editandoOutfit}
+                onGuardar={() => { setEditandoOutfit(null); cargarOutfits(); }}
+                onCerrar={() => setEditandoOutfit(null)}
+              />
+            )}
+          </div>
+        )}
+
+        {dialogo}
       </main>
     </div>
   );

@@ -70,6 +70,9 @@ body.dark .app-header {
 }
 
 .app-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   gap: 4px;
   background: rgba(0,0,0,0.05);
@@ -910,4 +913,236 @@ body.dark .outfit-prenda-item { background: rgba(255,255,255,0.06); }
   gap: 12px;
   margin: 16px 0;
   flex-wrap: wrap;
+}
+
+.header-usuario {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  font-weight: 500;
+}
+
+.btn-logout {
+  padding: 7px 14px;
+  background: transparent;
+  color: inherit;
+  border: 1.5px solid rgba(166,124,82,0.3);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: 0.18s;
+  opacity: 0.7;
+}
+
+.btn-logout:hover {
+  opacity: 1;
+  background: rgba(166,124,82,0.1);
+}
+
+.login-fondo {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #f5f1eb 0%, #e0d5c8 100%);
+  padding: 24px;
+}
+
+body.dark .login-fondo {
+  background: linear-gradient(135deg, #1b1512, #2a211d);
+}
+
+.login-panel {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  border-radius: 28px;
+  padding: 48px 40px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+body.dark .login-panel {
+  background: rgba(42,33,29,0.9);
+  color: #f5f1eb;
+}
+
+.login-titulo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.login-sub {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.55;
+  line-height: 1.5;
+}
+
+.login-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0,0,0,0.05);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+body.dark .login-tabs { background: rgba(255,255,255,0.07); }
+
+.login-tab {
+  flex: 1;
+  padding: 8px;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: 0.18s;
+  opacity: 0.55;
+}
+
+.login-tab.activo {
+  background: #a67c52;
+  color: #fff;
+  opacity: 1;
+}
+
+.login-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-campos input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(166,124,82,0.2);
+  background: rgba(255,255,255,0.7);
+  font-size: 0.9rem;
+  color: inherit;
+  transition: 0.2s;
+}
+
+.login-campos input:focus {
+  outline: none;
+  border-color: #a67c52;
+  box-shadow: 0 0 0 3px rgba(166,124,82,0.15);
+}
+
+body.dark .login-campos input {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.12);
+  color: #f5f1eb;
+}
+
+.login-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #c0392b;
+  text-align: center;
+}
+
+.login-btn {
+  padding: 13px;
+  border-radius: 14px;
+  background: #a67c52;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: 0.18s;
+  width: 100%;
+}
+
+.login-btn:hover { background: #8d6743; }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.vista-seccion {
+  text-align: center;
+  padding: 48px 0 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.vista-titulo {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.vista-sub {
+  font-size: 0.95rem;
+  opacity: 0.5;
+  margin: 0;
+}
+
+.vista-vacia {
+  text-align: center;
+  max-width: 420px;
+  margin: 40px auto;
+  font-size: 0.95rem;
+  opacity: 0.55;
+  line-height: 1.7;
+}
+
+.outfit-bloque {
+  margin-bottom: 48px;
+}
+
+.outfit-bloque-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.outfit-bloque-nombre {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.outfit-bloque-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.outfit-bloque-acciones button {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  border-radius: 10px;
+}
+
+.outfit-prendas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-separador {
+  width: 1px;
+  height: 20px;
+  background: rgba(166,124,82,0.25);
 }

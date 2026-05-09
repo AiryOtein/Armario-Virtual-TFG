@@ -56,15 +56,16 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
     setGuardando(true);
     setError("");
 
+    // Si hay nueva imagen, se sube via FormData a upload_prenda o al endpoint PUT con imagen
     if (nuevaImagen) {
       const data = new FormData();
       Object.keys(form).forEach((k) => data.append(k, form[k]));
       data.append("nombre", form.tipo);
       data.append("imagen", nuevaImagen);
-      data.append("_method", "PUT");
 
-      await fetch(`http://localhost/armario/backend/api.php?resource=prendas&id=${prenda.id}&_img=1`, {
+      await fetch(`http://localhost/armario/backend/api.php?resource=prendas&id=${prenda.id}`, {
         method: "POST",
+        headers: { "Authorization": `Bearer ${localStorage.getItem("armario_token") || ""}` },
         body: data,
       });
     } else {
@@ -84,6 +85,7 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
           <button className="modal-close" onClick={onCerrar}>✕</button>
         </div>
 
+        {/* Preview de imagen */}
         <div className="modal-imagen">
           <img
             src={preview || `http://localhost/armario/uploads/${prenda.imagen}`}
@@ -96,6 +98,7 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
           </label>
         </div>
 
+        {/* Campos */}
         <div className="modal-campos">
           <input
             name="tipo"
@@ -151,7 +154,7 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
         <div className="modal-actions">
           <button onClick={onCerrar} className="btn-secundario">Cancelar</button>
           <button onClick={guardar} disabled={guardando}>
-            {guardando ? "Guardando..." : "Guardar cambios"}
+            {guardando ? "Guardando..." : "✅ Guardar cambios"}
           </button>
         </div>
       </div>

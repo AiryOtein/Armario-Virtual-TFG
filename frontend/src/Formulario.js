@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 const TALLAS_ROPA   = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 const TALLAS_ZAPATO = Array.from({ length: 11 }, (_, i) => String(36 + i)); // 36–46
 
@@ -64,10 +65,17 @@ function Formulario({ onAdd, cajon, cajones = [] }) {
     data.append("cajon",  form.cajon);
     data.append("imagen", imagen);
 
-    await fetch("http://localhost/armario/backend/api.php?resource=prendas", {
+    const res  = await fetch("http://localhost/armario/backend/api.php?resource=prendas", {
       method: "POST",
+      headers: { "Authorization": `Bearer ${localStorage.getItem("armario_token") || ""}` },
       body: data,
     });
+    const json = await res.json();
+
+    if (!json.ok) {
+      setError(json.error || "Error al guardar la prenda.");
+      return;
+    }
 
     onAdd();
   };
