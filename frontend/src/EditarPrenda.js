@@ -5,15 +5,9 @@ const TALLAS_ROPA   = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 const TALLAS_ZAPATO = Array.from({ length: 11 }, (_, i) => String(36 + i));
 const TIPOS_ZAPATO  = ["zapatos", "zapatillas", "botas", "sandalias", "tacones", "deportivas"];
 const CAJONES_BASE  = ["camisetas", "pantalones", "zapatos", "vestidos"];
-const COLORES       = ["Negro", "Blanco", "Gris", "Beige", "Marrón", "Rojo", "Rosa",
-                       "Naranja", "Amarillo", "Verde", "Azul", "Morado", "Lila",
-                       "Azul marino", "Verde oliva"];
-const TIPOS         = ["Camiseta", "Sudadera", "Chaqueta", "Abrigo", "Pantalón", "Vaqueros",
-                       "Falda", "Vestido", "Zapatos", "Zapatillas", "Botas", "Sandalias",
-                       "Tacones", "Deportivas", "Shorts", "Mono"];
-const MARCAS        = ["Zara", "H&M", "Mango", "Pull&Bear", "Bershka", "Stradivarius",
-                       "Nike", "Adidas", "New Balance", "Puma", "Vans", "Converse",
-                       "Levi's", "COS", "& Other Stories"];
+const COLORES       = ["Negro","Blanco","Gris","Beige","Marrón","Rojo","Rosa","Naranja","Amarillo","Verde","Azul","Morado","Lila","Azul marino","Verde oliva"];
+const TIPOS         = ["Camiseta","Sudadera","Chaqueta","Abrigo","Pantalón","Vaqueros","Falda","Vestido","Zapatos","Zapatillas","Botas","Sandalias","Tacones","Deportivas","Shorts","Mono"];
+const MARCAS        = ["Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius","Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","Otra Tienda"];
 
 function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
   const [form, setForm] = useState({
@@ -29,16 +23,12 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
   const [guardando,   setGuardando]   = useState(false);
   const [error,       setError]       = useState("");
 
-  const esZapato = TIPOS_ZAPATO.includes(form.tipo?.toLowerCase());
+  const esZapato = TIPOS_ZAPATO.includes(form.tipo?.toLowerCase()) || form.cajon === "zapatos";
   const tallas   = esZapato ? TALLAS_ZAPATO : TALLAS_ROPA;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === "tipo" ? { talla: "" } : {}),
-    }));
+    setForm((prev) => ({ ...prev, [name]: value, ...(name === "tipo" ? { talla: "" } : {}) }));
   };
 
   const handleImagen = (e) => {
@@ -49,31 +39,25 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
   };
 
   const guardar = async () => {
-    if (!form.tipo || !form.color || !form.talla) {
-      setError("Tipo, color y talla son obligatorios.");
-      return;
-    }
+    if (!form.color || !form.talla) { setError("Color y talla son obligatorios."); return; }
     setGuardando(true);
     setError("");
 
-    // Si hay nueva imagen, se sube via FormData a upload_prenda o al endpoint PUT con imagen
+    await updatePrenda(prenda.id, { ...form, nombre: form.tipo || form.color });
+
     if (nuevaImagen) {
       const data = new FormData();
-      Object.keys(form).forEach((k) => data.append(k, form[k]));
-      data.append("nombre", form.tipo);
       data.append("imagen", nuevaImagen);
-
-      await fetch(`http://localhost/armario/backend/api.php?resource=prendas&id=${prenda.id}`, {
+      const res = await fetch(`http://localhost/armario/backend/api.php?resource=prendas&id=${prenda.id}`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${localStorage.getItem("armario_token") || ""}` },
         body: data,
       });
-    } else {
-      await updatePrenda(prenda.id, { ...form, nombre: form.tipo });
+      await res.json();
     }
 
     setGuardando(false);
-    onGuardar && onGuardar();
+    onGuardar(preview);
   };
 
   return (
@@ -85,7 +69,6 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
           <button className="modal-close" onClick={onCerrar}>✕</button>
         </div>
 
-        {/* Preview de imagen */}
         <div className="modal-imagen">
           <img
             src={preview || `http://localhost/armario/uploads/${prenda.imagen}`}
@@ -93,53 +76,22 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
             onError={(e) => (e.target.style.display = "none")}
           />
           <label className="file-label file-label--small">
-            📷 Cambiar imagen
-            <input type="file" accept="image/*" onChange={handleImagen} />
+            Cambiar imagen
+            <input type="file" accept="image/*,.heic,.heif,.webp,.avif" onChange={handleImagen} />
           </label>
         </div>
 
-        {/* Campos */}
         <div className="modal-campos">
-          <input
-            name="tipo"
-            placeholder="Tipo de prenda"
-            value={form.tipo}
-            onChange={handleChange}
-            list="edit-tipos"
-            autoComplete="off"
-          />
-          <datalist id="edit-tipos">
-            {TIPOS.map((t) => <option key={t} value={t} />)}
-          </datalist>
-
-          <input
-            name="color"
-            placeholder="Color"
-            value={form.color}
-            onChange={handleChange}
-            list="edit-colores"
-            autoComplete="off"
-          />
-          <datalist id="edit-colores">
-            {COLORES.map((c) => <option key={c} value={c} />)}
-          </datalist>
+          <input name="color" placeholder="Color" value={form.color} onChange={handleChange} list="edit-colores" autoComplete="off" />
+          <datalist id="edit-colores">{COLORES.map((c) => <option key={c} value={c} />)}</datalist>
 
           <select name="talla" value={form.talla} onChange={handleChange}>
             <option value="">{esZapato ? "Talla (36–46)" : "Talla (XXS–XXL)"}</option>
             {tallas.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
 
-          <input
-            name="marca"
-            placeholder="Marca"
-            value={form.marca}
-            onChange={handleChange}
-            list="edit-marcas"
-            autoComplete="off"
-          />
-          <datalist id="edit-marcas">
-            {MARCAS.map((m) => <option key={m} value={m} />)}
-          </datalist>
+          <input name="marca" placeholder="Marca" value={form.marca} onChange={handleChange} list="edit-marcas" autoComplete="off" />
+          <datalist id="edit-marcas">{MARCAS.map((m) => <option key={m} value={m} />)}</datalist>
 
           <select name="cajon" value={form.cajon} onChange={handleChange}>
             <option value="">Sin cajón</option>
@@ -154,7 +106,7 @@ function EditarPrenda({ prenda, cajones = [], onGuardar, onCerrar }) {
         <div className="modal-actions">
           <button onClick={onCerrar} className="btn-secundario">Cancelar</button>
           <button onClick={guardar} disabled={guardando}>
-            {guardando ? "Guardando..." : "✅ Guardar cambios"}
+            {guardando ? "Guardando..." : "Guardar cambios"}
           </button>
         </div>
       </div>

@@ -29,5 +29,5 @@ export const updateOutfit = (id, nombre, prendas) => put(`${API}?resource=outfit
 export const deleteOutfit = (id)                  => del(`${API}?resource=outfits&id=${id}`);
 
 export const getCajones  = ()       => get(`${API}?resource=cajones`);
-export const crearCajon  = (nombre) => post(`${API}?resource=cajones`, { nombre });
+export const crearCajon  = (nombre, tipo_talla = "letras") => post(`${API}?resource=cajones`, { nombre, tipo_talla });
 export const deleteCajon = (cajon)  => del(`${API}?resource=cajones&cajon=${encodeURIComponent(cajon)}`);

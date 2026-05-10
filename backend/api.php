@@ -83,7 +83,7 @@ function handlePrendas($conn, $method, $id, $uid) {
         return;
     }
 
-    if ($method === 'POST') {
+    if ($method === 'POST' && !$id) {
         $campos = ['nombre','tipo','color','talla','marca','cajon'];
         foreach ($campos as $c) {
             if (empty($_POST[$c])) { jsonError(400, "Falta el campo: $c"); return; }
@@ -111,6 +111,34 @@ function handlePrendas($conn, $method, $id, $uid) {
         } else {
             jsonError(500, "Error al guardar la prenda");
         }
+        return;
+    }
+
+    if ($method === 'POST' && $id) {
+        if (empty($_FILES['imagen'])) { jsonError(400, "Falta la imagen"); return; }
+
+        $stmt = $conn->prepare("SELECT imagen FROM prendas WHERE id = ? AND usuario_id = ?");
+        $stmt->bind_param("ii", $id, $uid);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if ($row && $row['imagen']) {
+            $rutaVieja = __DIR__ . "/../uploads/" . $row['imagen'];
+            if (file_exists($rutaVieja)) unlink($rutaVieja);
+        }
+
+        $uploadsBase = __DIR__ . "/../uploads/user_" . $uid;
+        if (!is_dir($uploadsBase)) mkdir($uploadsBase, 0755, true);
+
+        $imagen = time() . "_" . basename($_FILES['imagen']['name']);
+        $rutaDB = "user_" . $uid . "/" . $imagen;
+
+        if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $uploadsBase . "/" . $imagen)) {
+            jsonError(500, "Error al subir la imagen"); return;
+        }
+
+        $stmt2 = $conn->prepare("UPDATE prendas SET imagen = ? WHERE id = ? AND usuario_id = ?");
+        $stmt2->bind_param("sii", $rutaDB, $id, $uid);
+        echo json_encode(["ok" => $stmt2->execute()]);
         return;
     }
 
@@ -259,11 +287,12 @@ function handleOutfits($conn, $method, $id, $uid) {
 function handleCajones($conn, $method, $id, $uid) {
 
     if ($method === 'GET') {
-        $stmt = $conn->prepare("SELECT nombre FROM cajones WHERE usuario_id = ? ORDER BY nombre");
+        $stmt = $conn->prepare("SELECT nombre, tipo_talla FROM cajones WHERE usuario_id = ? ORDER BY nombre");
         $stmt->bind_param("i", $uid);
         $stmt->execute();
         $guardados        = fetchAll($stmt->get_result());
         $nombresGuardados = array_column($guardados, 'nombre');
+        $tipoTallaMap     = array_column($guardados, 'tipo_talla', 'nombre');
 
         $stmt2 = $conn->prepare("SELECT cajon as nombre, COUNT(*) as cantidad FROM prendas WHERE cajon IS NOT NULL AND cajon != '' AND usuario_id = ? GROUP BY cajon");
         $stmt2->bind_param("i", $uid);
@@ -274,7 +303,11 @@ function handleCajones($conn, $method, $id, $uid) {
         $todos = array_unique(array_merge($nombresGuardados, array_column($conPrendas, 'nombre')));
         sort($todos);
 
-        echo json_encode(array_map(fn($n) => ['nombre' => $n, 'cantidad' => $conPrendasMap[$n] ?? 0], $todos));
+        echo json_encode(array_map(fn($n) => [
+            'nombre'     => $n,
+            'cantidad'   => $conPrendasMap[$n] ?? 0,
+            'tipo_talla' => $tipoTallaMap[$n] ?? 'letras',
+        ], $todos));
         return;
     }
 
@@ -288,8 +321,9 @@ function handleCajones($conn, $method, $id, $uid) {
         $check->execute();
         if ($check->get_result()->num_rows > 0) { echo json_encode(["ok" => true]); return; }
 
-        $stmt = $conn->prepare("INSERT INTO cajones (nombre, usuario_id) VALUES (?, ?)");
-        $stmt->bind_param("si", $nombre, $uid);
+        $tipo_talla = trim($body['tipo_talla'] ?? 'letras');
+        $stmt = $conn->prepare("INSERT INTO cajones (nombre, usuario_id, tipo_talla) VALUES (?, ?, ?)");
+        $stmt->bind_param("sis", $nombre, $uid, $tipo_talla);
         echo json_encode(["ok" => $stmt->execute()]);
         return;
     }

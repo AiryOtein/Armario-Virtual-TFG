@@ -3,63 +3,52 @@ import { useState } from "react";
 const TALLAS_ROPA   = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 const TALLAS_ZAPATO = Array.from({ length: 11 }, (_, i) => String(36 + i));
 const CAJONES_BASE  = ["camisetas", "pantalones", "zapatos", "vestidos"];
-const CAJONES_ZAPATO = ["zapatos"];
 
-const COLORES_SUGERIDOS = [
+const COLORES_DEFAULT = [
   "Negro","Blanco","Gris","Beige","Marrón","Rojo","Rosa",
   "Naranja","Amarillo","Verde","Azul","Morado","Lila","Azul marino","Verde oliva",
 ];
 
 const MARCAS_DEFAULT = [
   "Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius",
-  "Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","& Other Stories",
+  "Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","Otra Tienda",
 ];
 
-const MARCAS_KEY = "armario_marcas_extra";
+const MARCAS_KEY  = "armario_marcas_extra";
+const COLORES_KEY = "armario_colores_extra";
 
-const getMarcasGuardadas = () => {
-  try { return JSON.parse(localStorage.getItem(MARCAS_KEY) || "[]"); } catch { return []; }
-};
-
-const guardarMarcaExtra = (marca) => {
-  const extra = getMarcasGuardadas();
-  if (!extra.includes(marca)) {
-    localStorage.setItem(MARCAS_KEY, JSON.stringify([...extra, marca]));
+const getExtra = (key) => { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; } };
+const guardarExtra = (key, valor) => {
+  const lista = getExtra(key);
+  if (!lista.map(x => x.toLowerCase()).includes(valor.toLowerCase())) {
+    localStorage.setItem(key, JSON.stringify([...lista, valor]));
   }
 };
 
 function SelectorMarca({ value, onChange }) {
-  const [abierto,    setAbierto]    = useState(false);
-  const [busqueda,   setBusqueda]   = useState("");
-  const [marcasExtra, setMarcasExtra] = useState(getMarcasGuardadas());
+  const [abierto,     setAbierto]     = useState(false);
+  const [busqueda,    setBusqueda]    = useState("");
+  const [marcasExtra, setMarcasExtra] = useState(getExtra(MARCAS_KEY));
 
-  const todasMarcas = [...new Set([...MARCAS_DEFAULT, ...marcasExtra])].sort();
-  const filtradas   = todasMarcas.filter((m) => m.toLowerCase().includes(busqueda.toLowerCase()));
-  const esNueva     = busqueda.trim() && !todasMarcas.map(m => m.toLowerCase()).includes(busqueda.trim().toLowerCase());
+  const todas    = [...new Set([...MARCAS_DEFAULT, ...marcasExtra])].sort();
+  const filtradas = todas.filter((m) => m.toLowerCase().includes(busqueda.toLowerCase()));
+  const esNueva   = busqueda.trim() && !todas.map(m => m.toLowerCase()).includes(busqueda.trim().toLowerCase());
 
-  const seleccionar = (marca) => {
-    onChange(marca);
-    setBusqueda("");
-    setAbierto(false);
-  };
+  const seleccionar = (marca) => { onChange(marca); setBusqueda(""); setAbierto(false); };
 
   const añadirNueva = () => {
     const nueva = busqueda.trim();
-    guardarMarcaExtra(nueva);
-    setMarcasExtra(getMarcasGuardadas());
+    guardarExtra(MARCAS_KEY, nueva);
+    setMarcasExtra(getExtra(MARCAS_KEY));
     seleccionar(nueva);
   };
 
   return (
     <div className="selector-marca">
-      <div
-        className="selector-marca-input"
-        onClick={() => { setAbierto(!abierto); setBusqueda(""); }}
-      >
+      <div className="selector-marca-input" onClick={() => { setAbierto(!abierto); setBusqueda(""); }}>
         <span className={value ? "" : "placeholder"}>{value || "Marca"}</span>
         <span className="selector-marca-arrow">{abierto ? "▲" : "▼"}</span>
       </div>
-
       {abierto && (
         <div className="selector-marca-panel">
           <input
@@ -72,15 +61,9 @@ function SelectorMarca({ value, onChange }) {
           />
           <div className="selector-marca-lista">
             {filtradas.map((m) => (
-              <div
-                key={m}
-                className={`selector-marca-opcion ${value === m ? "activa" : ""}`}
-                onClick={() => seleccionar(m)}
-              >
+              <div key={m} className={`selector-marca-opcion ${value === m ? "activa" : ""}`} onClick={() => seleccionar(m)}>
                 {m}
-                {!MARCAS_DEFAULT.includes(m) && (
-                  <span className="selector-marca-tag">tuya</span>
-                )}
+                {!MARCAS_DEFAULT.includes(m) && <span className="selector-marca-tag">tuya</span>}
               </div>
             ))}
             {esNueva && (
@@ -88,9 +71,7 @@ function SelectorMarca({ value, onChange }) {
                 Añadir "{busqueda.trim()}" como nueva marca
               </div>
             )}
-            {filtradas.length === 0 && !esNueva && (
-              <div className="selector-marca-vacio">Sin resultados</div>
-            )}
+            {filtradas.length === 0 && !esNueva && <div className="selector-marca-vacio">Sin resultados</div>}
           </div>
         </div>
       )}
@@ -98,7 +79,61 @@ function SelectorMarca({ value, onChange }) {
   );
 }
 
-function Formulario({ onAdd, cajon, cajones = [] }) {
+function SelectorColor({ value, onChange }) {
+  const [abierto,      setAbierto]      = useState(false);
+  const [busqueda,     setBusqueda]     = useState("");
+  const [coloresExtra, setColoresExtra] = useState(getExtra(COLORES_KEY));
+
+  const todos     = [...new Set([...COLORES_DEFAULT, ...coloresExtra])].sort();
+  const filtrados = todos.filter((c) => c.toLowerCase().includes(busqueda.toLowerCase()));
+  const esNuevo   = busqueda.trim() && !todos.map(c => c.toLowerCase()).includes(busqueda.trim().toLowerCase());
+
+  const seleccionar = (color) => { onChange(color); setBusqueda(""); setAbierto(false); };
+
+  const añadirNuevo = () => {
+    const nuevo = busqueda.trim();
+    guardarExtra(COLORES_KEY, nuevo);
+    setColoresExtra(getExtra(COLORES_KEY));
+    seleccionar(nuevo);
+  };
+
+  return (
+    <div className="selector-marca">
+      <div className="selector-marca-input" onClick={() => { setAbierto(!abierto); setBusqueda(""); }}>
+        <span className={value ? "" : "placeholder"}>{value || "Color"}</span>
+        <span className="selector-marca-arrow">{abierto ? "▲" : "▼"}</span>
+      </div>
+      {abierto && (
+        <div className="selector-marca-panel">
+          <input
+            autoFocus
+            className="selector-marca-busqueda"
+            placeholder="Buscar o escribir color..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="selector-marca-lista">
+            {filtrados.map((c) => (
+              <div key={c} className={`selector-marca-opcion ${value === c ? "activa" : ""}`} onClick={() => seleccionar(c)}>
+                {c}
+                {!COLORES_DEFAULT.includes(c) && <span className="selector-marca-tag">tuyo</span>}
+              </div>
+            ))}
+            {esNuevo && (
+              <div className="selector-marca-nueva" onClick={añadirNuevo}>
+                Añadir "{busqueda.trim()}" como nuevo color
+              </div>
+            )}
+            {filtrados.length === 0 && !esNuevo && <div className="selector-marca-vacio">Sin resultados</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Formulario({ onAdd, cajon, cajones = [], cajonesDB = [] }) {
   const [form, setForm] = useState({
     color: "",
     talla: "",
@@ -110,8 +145,9 @@ function Formulario({ onAdd, cajon, cajones = [] }) {
   const [preview, setPreview] = useState(null);
   const [error,   setError]   = useState("");
 
-  const esZapato = CAJONES_ZAPATO.includes(form.cajon) || form.cajon === "zapatos";
-  const tallas   = esZapato ? TALLAS_ZAPATO : TALLAS_ROPA;
+  const cajonInfo  = cajonesDB.find((c) => c.nombre === form.cajon);
+  const tipoTalla  = cajonInfo?.tipo_talla || (form.cajon === "zapatos" ? "numeros" : "letras");
+  const tallas     = tipoTalla === "numeros" ? TALLAS_ZAPATO : TALLAS_ROPA;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -133,14 +169,10 @@ function Formulario({ onAdd, cajon, cajones = [] }) {
       setError("Completa todos los campos y añade una imagen.");
       return;
     }
-
-    if (!form.cajon) {
-      setError("Selecciona un cajón.");
-      return;
-    }
+    if (!form.cajon) { setError("Selecciona un cajón."); return; }
 
     const data = new FormData();
-    data.append("nombre", form.marca);
+    data.append("nombre", form.color);
     data.append("tipo",   form.cajon);
     data.append("color",  form.color);
     data.append("talla",  form.talla);
@@ -155,10 +187,7 @@ function Formulario({ onAdd, cajon, cajones = [] }) {
     });
     const json = await res.json();
 
-    if (!json.ok) {
-      setError(json.error || "Error al guardar la prenda.");
-      return;
-    }
+    if (!json.ok) { setError(json.error || "Error al guardar la prenda."); return; }
 
     onAdd();
   };
@@ -175,20 +204,13 @@ function Formulario({ onAdd, cajon, cajones = [] }) {
         </select>
       )}
 
-      <input
-        name="color"
-        placeholder="Color"
+      <SelectorColor
         value={form.color}
-        onChange={handleChange}
-        list="colores-list"
-        autoComplete="off"
+        onChange={(c) => setForm((prev) => ({ ...prev, color: c }))}
       />
-      <datalist id="colores-list">
-        {COLORES_SUGERIDOS.map((c) => <option key={c} value={c} />)}
-      </datalist>
 
       <select name="talla" value={form.talla} onChange={handleChange}>
-        <option value="">{esZapato ? "Talla (36–46)" : "Talla (XXS–XXL)"}</option>
+        <option value="">{tipoTalla === "numeros" ? "Talla (36–46)" : "Talla (XXS–XXL)"}</option>
         {tallas.map((t) => <option key={t} value={t}>{t}</option>)}
       </select>
 
@@ -199,7 +221,7 @@ function Formulario({ onAdd, cajon, cajones = [] }) {
 
       <label className="file-label">
         {imagen ? `${imagen.name}` : "Seleccionar imagen"}
-        <input type="file" accept="image/*" onChange={handleImage} />
+        <input type="file" accept="image/*,.heic,.heif,.webp,.avif" onChange={handleImage} />
       </label>
 
       {preview && (

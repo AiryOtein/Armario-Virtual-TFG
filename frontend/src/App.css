@@ -1326,3 +1326,40 @@ body.dark .selector-marca-panel {
   opacity: 0.4;
   font-size: 0.85rem;
 }
+
+.dialogo-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dialogo-opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(166,124,82,0.08);
+  border: 1.5px solid transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: 0.18s;
+  text-align: left;
+  width: 100%;
+}
+
+.dialogo-opcion:hover {
+  background: rgba(166,124,82,0.16);
+  border-color: rgba(166,124,82,0.35);
+}
+
+.dialogo-opcion-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.dialogo-opcion-sub {
+  font-size: 0.8rem;
+  opacity: 0.55;
+  margin-top: 2px;
+}

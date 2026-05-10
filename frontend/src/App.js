@@ -10,7 +10,7 @@ import "./App.css";
 
 const CAJONES_BASE  = ["camisetas", "pantalones", "zapatos", "vestidos"];
 const COLORES_LISTA = ["Negro","Blanco","Gris","Beige","Marrón","Rojo","Rosa","Naranja","Amarillo","Verde","Azul","Morado","Lila","Azul marino","Verde oliva"];
-const MARCAS_LISTA  = ["Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius","Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","& Other Stories"];
+const MARCAS_LISTA  = ["Zara","H&M","Mango","Pull&Bear","Bershka","Stradivarius","Nike","Adidas","New Balance","Puma","Vans","Converse","Levi's","COS","Otra Tienda"];
 const TALLAS_ROPA   = ["XXS","XS","S","M","L","XL","XXL"];
 const TALLAS_ZAPATO = Array.from({ length: 11 }, (_, i) => String(36 + i));
 
@@ -28,15 +28,15 @@ function App() {
   const [mostrarForm,        setMostrarForm]        = useState(false);
   const [mostrarFormGlobal,  setMostrarFormGlobal]  = useState(false);
   const [busqueda,           setBusqueda]           = useState("");
-  const [filtro,             setFiltro]             = useState({ color: "", talla: "", marca: "" });
-  const [filtrosActivos,     setFiltrosActivos]     = useState({ color: "", talla: "", marca: "" });
+  const [filtro,             setFiltro]             = useState({ colores: [], tallas: [], marcas: [] });
+  const [filtrosActivos,     setFiltrosActivos]     = useState({ colores: [], tallas: [], marcas: [] });
   const [mostrarFiltros,     setMostrarFiltros]     = useState(false);
   const [mostrarCrearOutfit, setMostrarCrearOutfit] = useState(false);
   const [editandoOutfit,     setEditandoOutfit]     = useState(null);
   const [modo,               setModo]               = useState("light");
   const [vista,              setVista]              = useState("armario");
 
-  const { dialogo, confirmar, pedir } = useDialogo();
+  const { dialogo, confirmar, pedir, elegir } = useDialogo();
 
   const cajones = [...new Set([...CAJONES_BASE, ...cajonesDB.map((c) => c.nombre)])];
 
@@ -80,8 +80,15 @@ function App() {
   };
 
   const crearCajonNuevo = async () => {
-    const nuevo = await pedir("Nombre del nuevo cajón:", "ej: verano");
-    if (nuevo) { await crearCajon(nuevo.toLowerCase()); cargarCajones(); }
+    const nuevo = await pedir("Nombre del nuevo cajón:", "ej: tacones");
+    if (!nuevo) return;
+    const tipoTalla = await elegir("¿Qué tipo de talla usa este cajón?", [
+      { valor: "letras",  label: "Letras",  sub: "XXS, XS, S, M, L, XL, XXL" },
+      { valor: "numeros", label: "Números", sub: "36, 37, 38 ... 46" },
+    ]);
+    if (!tipoTalla) return;
+    await crearCajon(nuevo.toLowerCase(), tipoTalla);
+    cargarCajones();
   };
 
   const borrarCajon = async (c) => {
@@ -99,9 +106,20 @@ function App() {
     cargarOutfits();
   };
 
+  const toggleFiltro = (tipo, valor) => {
+    setFiltro((prev) => {
+      const lista = prev[tipo];
+      return { ...prev, [tipo]: lista.includes(valor) ? lista.filter(x => x !== valor) : [...lista, valor] };
+    });
+  };
+
   const aplicarFiltros = () => { setFiltrosActivos({ ...filtro }); setMostrarFiltros(false); };
-  const limpiarFiltros = () => { setFiltro({ color: "", talla: "", marca: "" }); setFiltrosActivos({ color: "", talla: "", marca: "" }); };
-  const hayFiltrosActivos = filtrosActivos.color || filtrosActivos.talla || filtrosActivos.marca;
+  const cerrarFiltros  = () => { setFiltro({ ...filtrosActivos }); setMostrarFiltros(false); };
+  const limpiarFiltros = () => {
+    const vacio = { colores: [], tallas: [], marcas: [] };
+    setFiltro(vacio); setFiltrosActivos(vacio);
+  };
+  const hayFiltrosActivos = filtrosActivos.colores.length || filtrosActivos.tallas.length || filtrosActivos.marcas.length;
 
   const filtrar = (p) => {
     const q = busqueda.toLowerCase();
@@ -110,12 +128,10 @@ function App() {
       p.marca?.toLowerCase().includes(q)  || p.tipo?.toLowerCase().includes(q)  ||
       p.talla?.toLowerCase().includes(q)  || p.cajon?.toLowerCase().includes(q)
     );
-    return (
-      coincideBusqueda &&
-      (!filtrosActivos.color || p.color?.toLowerCase() === filtrosActivos.color.toLowerCase()) &&
-      (!filtrosActivos.talla || p.talla?.toLowerCase() === filtrosActivos.talla.toLowerCase()) &&
-      (!filtrosActivos.marca || p.marca?.toLowerCase().includes(filtrosActivos.marca.toLowerCase()))
-    );
+    const coincideColor = !filtrosActivos.colores.length || filtrosActivos.colores.some(c => p.color?.toLowerCase() === c.toLowerCase());
+    const coincideTalla = !filtrosActivos.tallas.length  || filtrosActivos.tallas.some(t => p.talla?.toLowerCase() === t.toLowerCase());
+    const coincideMarca = !filtrosActivos.marcas.length  || filtrosActivos.marcas.some(m => p.marca?.toLowerCase().includes(m.toLowerCase()));
+    return coincideBusqueda && coincideColor && coincideTalla && coincideMarca;
   };
 
   const handleLogout = async () => {
@@ -205,12 +221,12 @@ function App() {
                 Filtros {hayFiltrosActivos ? "●" : ""}
               </button>
               <button className="btn-añadir" onClick={() => setMostrarFormGlobal((prev) => !prev)}>
-                + Añadir prenda
+                {mostrarFormGlobal ? "✕ Cancelar" : "+ Añadir prenda"}
               </button>
             </div>
 
             {mostrarFormGlobal && (
-              <Formulario cajon="" cajones={cajones} onAdd={async () => { await cargarPrendas(); setMostrarFormGlobal(false); }} />
+              <Formulario cajon="" cajones={cajones} cajonesDB={cajonesDB} onAdd={async () => { await cargarPrendas(); setMostrarFormGlobal(false); }} />
             )}
 
             <div className="prenda-container">
@@ -227,7 +243,9 @@ function App() {
               <h2 className="cajon-titulo">{cajonActual.toUpperCase()}</h2>
               <div className="cajon-header-botones">
                 <button className="btn-volver" onClick={() => { setCajonActual(null); setMostrarForm(false); }}>← Volver</button>
-                <button className="btn-añadir" onClick={() => setMostrarForm((prev) => !prev)}>+ Añadir prenda</button>
+                <button className="btn-añadir" onClick={() => setMostrarForm((prev) => !prev)}>
+                  {mostrarForm ? "✕ Cancelar" : "+ Añadir prenda"}
+                </button>
               </div>
             </div>
 
@@ -239,7 +257,7 @@ function App() {
             </div>
 
             {mostrarForm && (
-              <Formulario cajon={cajonActual} cajones={cajones} onAdd={async () => { await cargarPrendas(); setMostrarForm(false); }} />
+              <Formulario cajon={cajonActual} cajones={cajones} cajonesDB={cajonesDB} onAdd={async () => { await cargarPrendas(); setMostrarForm(false); }} />
             )}
 
             <div className="prenda-container">
@@ -251,35 +269,35 @@ function App() {
         )}
 
         {mostrarFiltros && (
-          <div className="filtros-overlay" onClick={() => setMostrarFiltros(false)}>
+          <div className="filtros-overlay" onClick={cerrarFiltros}>
             <div className="filtros-panel" onClick={(e) => e.stopPropagation()}>
               <h3 style={{ margin: "0 0 4px" }}>Filtros</h3>
 
               <label>Color</label>
               <div className="filtro-chips">
                 {COLORES_LISTA.map((c) => (
-                  <div key={c} className={`filtro-chip ${filtro.color === c ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, color: filtro.color === c ? "" : c })}>{c}</div>
+                  <div key={c} className={`filtro-chip ${filtro.colores.includes(c) ? "activo" : ""}`} onClick={() => toggleFiltro("colores", c)}>{c}</div>
                 ))}
               </div>
 
               <label>Talla — Ropa</label>
               <div className="filtro-chips">
                 {TALLAS_ROPA.map((t) => (
-                  <div key={t} className={`filtro-chip ${filtro.talla === t ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, talla: filtro.talla === t ? "" : t })}>{t}</div>
+                  <div key={t} className={`filtro-chip ${filtro.tallas.includes(t) ? "activo" : ""}`} onClick={() => toggleFiltro("tallas", t)}>{t}</div>
                 ))}
               </div>
 
               <label>Talla — Zapatos</label>
               <div className="filtro-chips">
                 {TALLAS_ZAPATO.map((t) => (
-                  <div key={t} className={`filtro-chip ${filtro.talla === t ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, talla: filtro.talla === t ? "" : t })}>{t}</div>
+                  <div key={t} className={`filtro-chip ${filtro.tallas.includes(t) ? "activo" : ""}`} onClick={() => toggleFiltro("tallas", t)}>{t}</div>
                 ))}
               </div>
 
               <label>Marca</label>
               <div className="filtro-chips">
                 {MARCAS_LISTA.map((m) => (
-                  <div key={m} className={`filtro-chip ${filtro.marca === m ? "activo" : ""}`} onClick={() => setFiltro({ ...filtro, marca: filtro.marca === m ? "" : m })}>{m}</div>
+                  <div key={m} className={`filtro-chip ${filtro.marcas.includes(m) ? "activo" : ""}`} onClick={() => toggleFiltro("marcas", m)}>{m}</div>
                 ))}
               </div>
 
@@ -301,7 +319,7 @@ function App() {
               ? <p className="vista-vacia">Todavía no tienes prendas marcadas como favoritas. Pulsa la estrella en cualquier prenda para añadirla aquí.</p>
               : <div className="prenda-container">
                   {favoritos.map((p) => (
-                    <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarFavoritos} onUpdate={cargarFavoritos} />
+                    <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={() => { cargarPrendas(); cargarFavoritos(); }} onUpdate={() => { cargarPrendas(); cargarFavoritos(); }} />
                   ))}
                 </div>
             }
