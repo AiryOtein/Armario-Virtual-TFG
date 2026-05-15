@@ -216,7 +216,7 @@ function App() {
             </div>
 
             <div className="barra-acciones">
-              <input className="input-busqueda" placeholder="Buscar por nombre, color, marca..." onChange={(e) => setBusqueda(e.target.value)} />
+              <input className="input-busqueda" placeholder="Buscar por nombre, color, marca..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
               <button className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`} onClick={() => setMostrarFiltros(true)}>
                 Filtros {hayFiltrosActivos ? "●" : ""}
               </button>
@@ -231,7 +231,7 @@ function App() {
 
             <div className="prenda-container">
               {todasPrendas.filter(filtrar).map((p) => (
-                <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={cargarPrendas} />
+                <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={() => { setBusqueda(""); cargarPrendas(); }} />
               ))}
             </div>
           </>
@@ -250,7 +250,7 @@ function App() {
             </div>
 
             <div className="barra-acciones">
-              <input className="input-busqueda" placeholder="Buscar por nombre, color, marca..." onChange={(e) => setBusqueda(e.target.value)} />
+              <input className="input-busqueda" placeholder="Buscar por nombre, color, marca..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
               <button className={`btn-filtros ${hayFiltrosActivos ? "btn-filtros--activo" : ""}`} onClick={() => setMostrarFiltros(true)}>
                 Filtros {hayFiltrosActivos ? "●" : ""}
               </button>
@@ -262,7 +262,7 @@ function App() {
 
             <div className="prenda-container">
               {prendas.filter(filtrar).map((p) => (
-                <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={cargarPrendas} />
+                <PrendaCard key={p.id} prenda={p} cajones={cajones} onDelete={cargarPrendas} onUpdate={() => { setBusqueda(""); cargarPrendas(); }} />
               ))}
             </div>
           </div>

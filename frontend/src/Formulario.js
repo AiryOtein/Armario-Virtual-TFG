@@ -145,9 +145,10 @@ function Formulario({ onAdd, cajon, cajones = [], cajonesDB = [] }) {
   const [preview, setPreview] = useState(null);
   const [error,   setError]   = useState("");
 
-  const cajonInfo  = cajonesDB.find((c) => c.nombre === form.cajon);
-  const tipoTalla  = cajonInfo?.tipo_talla || (form.cajon === "zapatos" ? "numeros" : "letras");
-  const tallas     = tipoTalla === "numeros" ? TALLAS_ZAPATO : TALLAS_ROPA;
+  const cajonFinal   = cajon || form.cajon || "";
+  const cajonInfo    = cajonesDB.find((c) => c.nombre === cajonFinal);
+  const esNumeros    = cajonInfo?.tipo_talla === "numeros" || cajonFinal === "zapatos";
+  const tallas       = esNumeros ? TALLAS_ZAPATO : TALLAS_ROPA;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -210,7 +211,7 @@ function Formulario({ onAdd, cajon, cajones = [], cajonesDB = [] }) {
       />
 
       <select name="talla" value={form.talla} onChange={handleChange}>
-        <option value="">{tipoTalla === "numeros" ? "Talla (36–46)" : "Talla (XXS–XXL)"}</option>
+        <option value="">{esNumeros ? "Talla (36–46)" : "Talla (XXS–XXL)"}</option>
         {tallas.map((t) => <option key={t} value={t}>{t}</option>)}
       </select>
 
